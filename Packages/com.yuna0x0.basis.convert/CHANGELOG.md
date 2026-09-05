@@ -6,6 +6,15 @@ Notable changes to this package. The format follows
 
 ## [Unreleased]
 
+## [0.5.4] - 2026-09-06
+
+### Added
+
+- A VRM expression's material colour and texture offset changes are written as Vixxy material
+  properties on the renderers that use that material alone, under MToon's property names. Both
+  formats: `vrm.expression.materialValues`. A material no renderer uses, or one that shares its
+  renderer with others, is reported: `vrm.expression.materials`, `vrm.expression.materialShared`.
+
 ## [0.5.3] - 2026-09-06
 
 ### Added
@@ -229,7 +238,8 @@ First release.
 - Two physics settings are fits rather than conversions, exposed as adjustable weights.
 - Component data is read from prefab files, so the avatar must still be linked to its prefab.
 
-[Unreleased]: https://github.com/yuna0x0/watari-basis/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/yuna0x0/watari-basis/compare/v0.5.4...HEAD
+[0.5.4]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.4
 [0.5.3]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.3
 [0.5.2]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.2
 [0.5.1]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.1

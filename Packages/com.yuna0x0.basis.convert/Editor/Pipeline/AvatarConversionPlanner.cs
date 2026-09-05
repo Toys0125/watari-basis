@@ -1290,6 +1290,7 @@ namespace yuna0x0.Basis.Convert.Pipeline
             List<VrmExpressionData> choices = new List<VrmExpressionData>();
             VrmExpressionData neutral = null;
             int driven = 0;
+            Dictionary<string, List<VrmMaterialHost>> hosts = MaterialHosts(root);
 
             foreach (VrmExpressionData expression in expressions)
             {
@@ -1297,7 +1298,7 @@ namespace yuna0x0.Basis.Convert.Pipeline
                 NameBlendShapes(expression, root);
                 plan.VrmExpressions.Add(expression);
 
-                if (VrmExpressionToVixxyMapper.IsMenuWorthy(expression))
+                if (VrmExpressionToVixxyMapper.IsMenuWorthy(expression, hosts))
                 {
                     choices.Add(expression);
                 }
@@ -1307,9 +1308,8 @@ namespace yuna0x0.Basis.Convert.Pipeline
                 {
                     plan.ToggleDiagnostics.Add(DiagnosticSeverity.Dropped,
                         "vrm.expression.materials",
-                        $"'{expression.Name}' changes only material values, so nothing was "
-                        + "written for it. VRM names the material to change, while Vixxy acts on "
-                        + "a renderer's properties.");
+                        $"'{expression.Name}' changes only materials no renderer on this avatar "
+                        + "uses, so nothing was written for it.");
                 }
                 else if (expression.Role == VrmExpressionRole.Neutral)
                 {
@@ -1327,7 +1327,8 @@ namespace yuna0x0.Basis.Convert.Pipeline
 
             if (choices.Count > 0)
             {
-                VixxyControlPlan control = VrmExpressionToVixxyMapper.MapSelector(choices, neutral);
+                VixxyControlPlan control =
+                    VrmExpressionToVixxyMapper.MapSelector(choices, neutral, hosts);
                 foreach (ConversionDiagnostic diagnostic in control.Diagnostics)
                 {
                     plan.ToggleDiagnostics.Add(diagnostic);
@@ -1352,6 +1353,51 @@ namespace yuna0x0.Basis.Convert.Pipeline
                     + "blinking and looking around. They were left for it rather than turned "
                     + "into menu controls the wearer would have to hold down.");
             }
+        }
+
+        /// <summary>
+        /// Every renderer under the root, by the name of each material it uses. VRM names the
+        /// material an expression changes; Vixxy changes a renderer's properties.
+        /// </summary>
+        private static Dictionary<string, List<VrmMaterialHost>> MaterialHosts(Transform root)
+        {
+            Dictionary<string, List<VrmMaterialHost>> hosts =
+                new Dictionary<string, List<VrmMaterialHost>>();
+
+            foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
+            {
+                string path = AnimationUtility.CalculateTransformPath(renderer.transform, root);
+                Material[] materials = renderer.sharedMaterials;
+                HashSet<string> seen = new HashSet<string>();
+                foreach (Material material in materials)
+                {
+                    if (material == null || !seen.Add(material.name))
+                    {
+                        continue;
+                    }
+
+                    int others = 0;
+                    foreach (Material other in materials)
+                    {
+                        if (other != null && other.name != material.name) others++;
+                    }
+
+                    if (!hosts.TryGetValue(material.name, out List<VrmMaterialHost> list))
+                    {
+                        list = new List<VrmMaterialHost>();
+                        hosts[material.name] = list;
+                    }
+
+                    list.Add(new VrmMaterialHost
+                    {
+                        Path = path,
+                        RendererTypeName = renderer.GetType().FullName,
+                        OtherMaterials = others,
+                    });
+                }
+            }
+
+            return hosts;
         }
 
         /// <summary>

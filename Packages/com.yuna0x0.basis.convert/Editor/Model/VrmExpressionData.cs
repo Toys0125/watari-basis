@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace yuna0x0.Basis.Convert.Model
 {
@@ -55,6 +56,74 @@ namespace yuna0x0.Basis.Convert.Model
         Blend = 2,
     }
 
+    /// <summary>
+    /// A material colour an expression sets. VRM 1.0 names one of six colour kinds and UniVRM
+    /// maps each to an MToon property; VRM 0.x names the shader property itself. Both end up as
+    /// a property name here.
+    /// </summary>
+    public sealed class VrmMaterialColorBinding
+    {
+        public string MaterialName = string.Empty;
+
+        /// <summary>
+        /// Shader property, as MToon declares it: _Color, _ShadeColor, _EmissionColor and so on.
+        /// </summary>
+        public string PropertyName = string.Empty;
+
+        public Vector4 TargetValue;
+    }
+
+    /// <summary>
+    /// A texture scale and offset an expression sets, on every UV texture of a material.
+    /// </summary>
+    public sealed class VrmMaterialUvBinding
+    {
+        public string MaterialName = string.Empty;
+        public Vector2 Scaling = Vector2.one;
+        public Vector2 Offset;
+
+        /// <summary>The value Unity's _MainTex_ST holds: scale in xy, offset in zw.</summary>
+        public Vector4 ScaleOffset => new Vector4(Scaling.x, Scaling.y, Offset.x, Offset.y);
+    }
+
+    /// <summary>
+    /// A renderer that uses a material an expression names, by path under the avatar root.
+    /// </summary>
+    public sealed class VrmMaterialHost
+    {
+        public string Path = string.Empty;
+        public string RendererTypeName = string.Empty;
+
+        /// <summary>
+        /// Materials on the same renderer other than this one. Vixxy sets a property for the
+        /// whole renderer, so a host with any is left alone rather than changing them too.
+        /// </summary>
+        public int OtherMaterials;
+    }
+
+    /// <summary>VRM 1.0's material colour kinds, in the order UniVRM serializes them.</summary>
+    public static class VrmMaterialProperties
+    {
+        public const string UvProperty = "_MainTex_ST";
+
+        /// <summary>
+        /// The MToon property each kind names, from UniVRM's MToon10Properties table.
+        /// </summary>
+        public static string NameOf(int bindType)
+        {
+            switch (bindType)
+            {
+                case 0: return "_Color";
+                case 1: return "_EmissionColor";
+                case 2: return "_ShadeColor";
+                case 3: return "_MatcapColor";
+                case 4: return "_RimColor";
+                case 5: return "_OutlineColor";
+                default: return string.Empty;
+            }
+        }
+    }
+
     /// <summary>One VRM expression, from either format.</summary>
     public sealed class VrmExpressionData
     {
@@ -76,10 +145,14 @@ namespace yuna0x0.Basis.Convert.Model
         public List<VrmMorphBinding> Bindings = new List<VrmMorphBinding>();
 
         /// <summary>
-        /// Material bindings the expression also carries. VRM changes a material's colour or its
-        /// UVs by naming the material rather than the renderer, which is not how Vixxy addresses
-        /// one, so these are counted and reported rather than converted.
+        /// Material changes the expression also carries. VRM names the material; Vixxy acts on a
+        /// renderer, so the planner finds the renderers that use each material.
         /// </summary>
-        public int MaterialBindingCount;
+        public List<VrmMaterialColorBinding> MaterialColorBindings =
+            new List<VrmMaterialColorBinding>();
+
+        public List<VrmMaterialUvBinding> MaterialUvBindings = new List<VrmMaterialUvBinding>();
+
+        public int MaterialBindingCount => MaterialColorBindings.Count + MaterialUvBindings.Count;
     }
 }

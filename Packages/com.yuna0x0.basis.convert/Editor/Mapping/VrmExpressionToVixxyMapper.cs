@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 using yuna0x0.Basis.Convert.Model;
 
 namespace yuna0x0.Basis.Convert.Mapping
@@ -17,7 +18,10 @@ namespace yuna0x0.Basis.Convert.Mapping
     /// <para>
     /// Only the expressions an author added and the emotions are choices. Visemes, blinking and
     /// looking around are driven by Basis itself. Neutral, when it carries weights of its own, is
-    /// the first choice.
+    /// the first choice. A material colour or texture offset an expression sets is written on
+    /// every renderer that uses the material it names and nothing else, as a Vixxy material
+    /// property; Vixxy sets properties per renderer, so a renderer that also carries other
+    /// materials is left alone and reported.
     /// </para>
     /// </summary>
     public static class VrmExpressionToVixxyMapper
@@ -25,19 +29,62 @@ namespace yuna0x0.Basis.Convert.Mapping
         public const string MenuName = "Expression";
         public const string NeutralChoice = "Neutral";
 
-        /// <summary>Whether this expression is a choice on the selector.</summary>
-        public static bool IsMenuWorthy(VrmExpressionData expression) =>
-            expression != null
-            && expression.Bindings.Count > 0
-            && (expression.Role == VrmExpressionRole.Custom
-                || expression.Role == VrmExpressionRole.Emotion);
+        /// <summary>
+        /// Whether this expression is a choice on the selector: an author-added or emotion
+        /// expression that moves a blendshape, or changes a material some renderer uses.
+        /// </summary>
+        public static bool IsMenuWorthy(VrmExpressionData expression,
+            IReadOnlyDictionary<string, List<VrmMaterialHost>> hosts = null)
+        {
+            if (expression == null
+                || (expression.Role != VrmExpressionRole.Custom
+                    && expression.Role != VrmExpressionRole.Emotion))
+            {
+                return false;
+            }
+
+            if (expression.Bindings.Count > 0)
+            {
+                return true;
+            }
+
+            foreach (VrmMaterialColorBinding colour in expression.MaterialColorBindings)
+            {
+                if (HasHost(hosts, colour.MaterialName)) return true;
+            }
+
+            foreach (VrmMaterialUvBinding uv in expression.MaterialUvBindings)
+            {
+                if (HasHost(hosts, uv.MaterialName)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether some renderer uses the material and nothing else.</summary>
+        private static bool HasHost(
+            IReadOnlyDictionary<string, List<VrmMaterialHost>> hosts, string material)
+        {
+            if (hosts == null || !hosts.TryGetValue(material, out List<VrmMaterialHost> found))
+            {
+                return false;
+            }
+
+            foreach (VrmMaterialHost host in found)
+            {
+                if (host.OtherMaterials == 0) return true;
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// One selector over these expressions. <paramref name="neutral"/> is the avatar's
         /// Neutral expression when it has bindings, and may be null.
         /// </summary>
         public static VixxyControlPlan MapSelector(
-            IReadOnlyList<VrmExpressionData> expressions, VrmExpressionData neutral = null)
+            IReadOnlyList<VrmExpressionData> expressions, VrmExpressionData neutral = null,
+            IReadOnlyDictionary<string, List<VrmMaterialHost>> hosts = null)
         {
             VixxyControlPlan plan = new VixxyControlPlan
             {
@@ -61,18 +108,88 @@ namespace yuna0x0.Basis.Convert.Mapping
                 new Dictionary<string, VixxySubjectPlan>();
             Dictionary<(string, string), VixxyBlendShapePlan> shapes =
                 new Dictionary<(string, string), VixxyBlendShapePlan>();
+            Dictionary<(string, string), VixxyMaterialPropertyPlan> properties =
+                new Dictionary<(string, string), VixxyMaterialPropertyPlan>();
+
+            VixxySubjectPlan SubjectFor(string path, string rendererTypeName = null)
+            {
+                if (!subjects.TryGetValue(path, out VixxySubjectPlan subject))
+                {
+                    subject = new VixxySubjectPlan { Path = path };
+                    subjects[path] = subject;
+                    plan.Subjects.Add(subject);
+                }
+
+                if (rendererTypeName != null)
+                {
+                    subject.RendererTypeName = rendererTypeName;
+                }
+
+                return subject;
+            }
+
+            // A material property on every renderer that uses the material, set at this choice
+            // and left to the material as authored at the others. VRM applies a bind as
+            // base + (target - base) * weight, so worn fully it is the target and unworn the base.
+            int ApplyMaterial(string material, string property, VixxyMaterialPropertyKind kind,
+                Vector4 value, int choice, List<string> missing, List<string> shared)
+            {
+                if (string.IsNullOrEmpty(property))
+                {
+                    return 0;
+                }
+
+                if (hosts == null || !hosts.TryGetValue(material, out List<VrmMaterialHost> found))
+                {
+                    if (!missing.Contains(material)) missing.Add(material);
+                    return 0;
+                }
+
+                int written = 0;
+                foreach (VrmMaterialHost host in found)
+                {
+                    if (host.OtherMaterials > 0)
+                    {
+                        string note =
+                            $"'{material}' on {host.Path} ({host.OtherMaterials + 1} materials)";
+                        if (!shared.Contains(note)) shared.Add(note);
+                        continue;
+                    }
+
+                    written++;
+                    VixxySubjectPlan subject = SubjectFor(host.Path, host.RendererTypeName);
+                    if (!properties.TryGetValue((host.Path, property),
+                            out VixxyMaterialPropertyPlan planned))
+                    {
+                        bool[][] set = new bool[count][];
+                        for (int c = 0; c < count; c++) set[c] = new bool[4];
+                        planned = new VixxyMaterialPropertyPlan
+                        {
+                            PropertyName = property,
+                            Kind = kind,
+                            Choices = new Vector4[count],
+                            Set = set,
+                        };
+                        properties[(host.Path, property)] = planned;
+                        subject.MaterialProperties.Add(planned);
+                    }
+
+                    planned.Choices[choice] = value;
+                    for (int channel = 0; channel < 4; channel++)
+                    {
+                        planned.Set[choice][channel] = true;
+                    }
+                }
+
+                return written;
+            }
 
             VixxyBlendShapePlan ShapeFor(VrmMorphBinding binding)
             {
                 if (!shapes.TryGetValue((binding.Path, binding.ShapeName),
                         out VixxyBlendShapePlan shape))
                 {
-                    if (!subjects.TryGetValue(binding.Path, out VixxySubjectPlan subject))
-                    {
-                        subject = new VixxySubjectPlan { Path = binding.Path };
-                        subjects[binding.Path] = subject;
-                        plan.Subjects.Add(subject);
-                    }
+                    VixxySubjectPlan subject = SubjectFor(binding.Path);
 
                     bool[] set = new bool[count];
                     for (int c = 0; c < count; c++)
@@ -115,12 +232,43 @@ namespace yuna0x0.Basis.Convert.Mapping
                         + "usually means the mesh has changed since the expression was authored.");
                 }
 
-                if (expression.MaterialBindingCount > 0)
+                List<string> missing = new List<string>();
+                List<string> shared = new List<string>();
+                int renderers = 0;
+                foreach (VrmMaterialColorBinding colour in expression.MaterialColorBindings)
+                {
+                    renderers += ApplyMaterial(colour.MaterialName, colour.PropertyName,
+                        VixxyMaterialPropertyKind.Colour, colour.TargetValue, choice, missing,
+                        shared);
+                }
+
+                foreach (VrmMaterialUvBinding uv in expression.MaterialUvBindings)
+                {
+                    renderers += ApplyMaterial(uv.MaterialName, VrmMaterialProperties.UvProperty,
+                        VixxyMaterialPropertyKind.Vector, uv.ScaleOffset, choice, missing, shared);
+                }
+
+                if (shared.Count > 0)
+                {
+                    plan.Diagnostics.Add(DiagnosticSeverity.Dropped,
+                        "vrm.expression.materialShared",
+                        $"'{expression.Name}' changes {string.Join(", ", shared)}. Vixxy sets a "
+                        + "property for the whole renderer, which would change the other materials "
+                        + "too, so that part was left out.");
+                }
+
+                if (renderers > 0)
+                {
+                    plan.Diagnostics.Add(DiagnosticSeverity.Mapped, "vrm.expression.materialValues",
+                        $"'{expression.Name}' also sets material properties, written on the "
+                        + $"{renderers} renderers that use the materials it names.");
+                }
+
+                if (missing.Count > 0)
                 {
                     plan.Diagnostics.Add(DiagnosticSeverity.Dropped, "vrm.expression.materials",
-                        $"'{expression.Name}' also changes {expression.MaterialBindingCount} "
-                        + "material values. VRM names the material to change, while Vixxy acts "
-                        + "on a renderer's properties, so those were not carried over.");
+                        $"'{expression.Name}' changes material '{string.Join("', '", missing)}', "
+                        + "which no renderer on this avatar uses, so that part was not written.");
                 }
             }
 

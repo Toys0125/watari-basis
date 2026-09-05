@@ -487,7 +487,7 @@ namespace yuna0x0.Basis.Convert.Sources
             // A 0.x binding's weight is already on Unity's scale: UniVRM passes it straight to
             // SetBlendShapeWeight.
             ReadBindings(clip, "Values", 1f, expression);
-            expression.MaterialBindingCount = CountEntries(clip, "MaterialValues");
+            ReadVrm0MaterialValues(clip, expression);
             expression.IsBinary = clip.TryGetInt("IsBinary", out int binary) && binary != 0;
 
             if (string.IsNullOrEmpty(expression.Name))
@@ -506,8 +506,7 @@ namespace yuna0x0.Basis.Convert.Sources
             };
 
             ReadBindings(clip, "MorphTargetBindings", Vrm10WeightToUnity, expression);
-            expression.MaterialBindingCount = CountEntries(clip, "MaterialColorBindings")
-                + CountEntries(clip, "MaterialUVBindings");
+            ReadVrm10MaterialBindings(clip, expression);
 
             expression.IsBinary = clip.TryGetInt("IsBinary", out int binary) && binary != 0;
             expression.OverrideBlink = OverrideOf(clip, "OverrideBlink");
@@ -572,23 +571,148 @@ namespace yuna0x0.Basis.Convert.Sources
             }
         }
 
-        private static int CountEntries(UnityYamlDocument clip, string key)
+        /// <summary>
+        /// The map entries of a top level sequence, as key to value text, one dictionary per
+        /// item. Both formats write material bindings as sequences of flat maps.
+        /// </summary>
+        private static List<Dictionary<string, string>> Entries(UnityYamlDocument clip, string key)
         {
+            List<Dictionary<string, string>> items = new List<Dictionary<string, string>>();
             if (!clip.TryGetTopLevelBlock(key, out List<string> block))
             {
-                return 0;
+                return items;
             }
 
-            int count = 0;
+            Dictionary<string, string> current = null;
             foreach (string line in block)
             {
-                if (line.TrimStart().StartsWith("-"))
+                string trimmed = line.TrimStart();
+                if (trimmed.StartsWith("-"))
                 {
-                    count++;
+                    current = new Dictionary<string, string>();
+                    items.Add(current);
+                    trimmed = trimmed.Substring(1).TrimStart();
+                }
+
+                int colon = trimmed.IndexOf(':');
+                if (current == null || colon <= 0)
+                {
+                    continue;
+                }
+
+                current[trimmed.Substring(0, colon).Trim()] = trimmed.Substring(colon + 1).Trim();
+            }
+
+            return items;
+        }
+
+        private static readonly System.Text.RegularExpressions.Regex ComponentPattern =
+            new System.Text.RegularExpressions.Regex(
+                @"(?<key>[xyzwrgba])\s*:\s*(?<value>-?[0-9.eE+-]+)",
+                System.Text.RegularExpressions.RegexOptions.Compiled);
+
+        /// <summary>`{x: 1, y: 0, z: 0, w: 1}`, or the same with r, g, b, a, as a vector.</summary>
+        private static Vector4 ParseVector(string text, Vector4 fallback)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return fallback;
+            }
+
+            Vector4 value = fallback;
+            foreach (System.Text.RegularExpressions.Match match in ComponentPattern.Matches(text))
+            {
+                if (!float.TryParse(match.Groups["value"].Value,
+                        System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out float component))
+                {
+                    continue;
+                }
+
+                switch (match.Groups["key"].Value)
+                {
+                    case "x": case "r": value.x = component; break;
+                    case "y": case "g": value.y = component; break;
+                    case "z": case "b": value.z = component; break;
+                    case "w": case "a": value.w = component; break;
                 }
             }
 
-            return count;
+            return value;
+        }
+
+        private static void ReadVrm10MaterialBindings(
+            UnityYamlDocument clip, VrmExpressionData expression)
+        {
+            foreach (Dictionary<string, string> item in Entries(clip, "MaterialColorBindings"))
+            {
+                item.TryGetValue("MaterialName", out string material);
+                item.TryGetValue("BindType", out string type);
+                item.TryGetValue("TargetValue", out string target);
+                expression.MaterialColorBindings.Add(new VrmMaterialColorBinding
+                {
+                    MaterialName = material ?? string.Empty,
+                    PropertyName = VrmMaterialProperties.NameOf(
+                        UnityYamlValues.TryParseInt(type ?? string.Empty, out int bindType)
+                            ? bindType
+                            : -1),
+                    TargetValue = ParseVector(target, Vector4.zero),
+                });
+            }
+
+            foreach (Dictionary<string, string> item in Entries(clip, "MaterialUVBindings"))
+            {
+                item.TryGetValue("MaterialName", out string material);
+                item.TryGetValue("Scaling", out string scaling);
+                item.TryGetValue("Offset", out string offset);
+                Vector4 scale = ParseVector(scaling, new Vector4(1f, 1f, 0f, 0f));
+                Vector4 shift = ParseVector(offset, Vector4.zero);
+                expression.MaterialUvBindings.Add(new VrmMaterialUvBinding
+                {
+                    MaterialName = material ?? string.Empty,
+                    Scaling = new Vector2(scale.x, scale.y),
+                    Offset = new Vector2(shift.x, shift.y),
+                });
+            }
+        }
+
+        /// <summary>
+        /// VRM 0.x names the shader property itself. `_MainTex_ST` is the texture scale and
+        /// offset; anything else is a colour.
+        /// </summary>
+        private static void ReadVrm0MaterialValues(
+            UnityYamlDocument clip, VrmExpressionData expression)
+        {
+            foreach (Dictionary<string, string> item in Entries(clip, "MaterialValues"))
+            {
+                item.TryGetValue("MaterialName", out string material);
+                item.TryGetValue("ValueName", out string property);
+                item.TryGetValue("TargetValue", out string target);
+                Vector4 value = ParseVector(target, Vector4.zero);
+
+                if (property == VrmMaterialProperties.UvProperty)
+                {
+                    expression.MaterialUvBindings.Add(new VrmMaterialUvBinding
+                    {
+                        MaterialName = material ?? string.Empty,
+                        Scaling = new Vector2(value.x, value.y),
+                        Offset = new Vector2(value.z, value.w),
+                    });
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(property))
+                {
+                    continue;
+                }
+
+                expression.MaterialColorBindings.Add(new VrmMaterialColorBinding
+                {
+                    MaterialName = material ?? string.Empty,
+                    PropertyName = property,
+                    TargetValue = value,
+                });
+            }
         }
 
         /// <summary>

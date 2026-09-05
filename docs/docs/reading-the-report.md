@@ -57,7 +57,9 @@ produces sixty identical notes, which is unreadable one by one and useful as a c
 | `vrm.branchesExcluded` | Bones hanging off a VRM chain that the spring never named were excluded, so they stay as still as VRM left them. |
 | `vrm.expressionsRebuilt` | The avatar's expressions became one Vixxy selector named Expression: Neutral, then one choice each. |
 | `vrm.expressionsDriven` | Visemes, blink and look-at expressions were left to Basis, which drives those itself. |
-| `vrm.expression.materials` | An expression also changed material values. Vixxy acts through a renderer, so those were not carried over. |
+| `vrm.expression.materialValues` | An expression's material changes were written on the renderers that use the materials it names. |
+| `vrm.expression.materials` | An expression changes a material no renderer on the avatar uses, so that part was left out. |
+| `vrm.expression.materialShared` | The material sits on a renderer with other materials. Vixxy sets a property per renderer, so that part was left out. |
 | `vrm.expression.continuous` | Expressions VRM lets the wearer apply at any strength. A choice is all or nothing. |
 | `vrm.expression.override` | An expression blocks or attenuates blink, gaze or lip sync while worn. Basis keeps those running. |
 | `vrm.lookAt.expression` | The avatar aims its eyes with expressions, not eye bones. Basis rotates eye bones, so these eyes do not follow gaze. |

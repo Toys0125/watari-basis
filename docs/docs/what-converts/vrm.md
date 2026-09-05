@@ -66,11 +66,18 @@ selector named Expression: Neutral first, then one choice per expression. Every 
 expression touches is set at every choice, at the expression's weight or at zero, which is the
 spec's own rule for applying expressions.
 
-Three things the spec allows are reported rather than converted. An expression that is not
+An expression that also changes a material colour, or a texture's scale and offset, keeps that
+too. VRM names the material; the property is written on every renderer that uses that material
+and nothing else, as a Vixxy material property under MToon's names (`_Color`, `_ShadeColor`,
+`_EmissionColor`, `_MatcapColor`, `_RimColor`, `_OutlineColor`, `_MainTex_ST`). Vixxy sets a
+property for the whole renderer, so a renderer that also carries other materials is left alone
+and reported: `vrm.expression.materialShared`. A material no renderer uses is reported and that
+part is left out: `vrm.expression.materials`.
+
+Two things the spec allows are reported rather than converted. An expression that is not
 `isBinary` can be worn at any strength; a choice is all or nothing: `vrm.expression.continuous`.
 An expression's overrides, which block or attenuate blink, gaze or lip sync while it is worn, have
-no counterpart, since Basis keeps those running: `vrm.expression.override`. An expression made
-only of material changes writes nothing: `vrm.expression.materials`.
+no counterpart, since Basis keeps those running: `vrm.expression.override`.
 
 The lip sync shapes, blinking and looking around do not become controls. Basis drives those
 itself, and a menu item would fight it.
@@ -86,8 +93,6 @@ VRM refers to a blendshape by its position in the mesh rather than by name, so e
 up on the renderer it names. A shape that is no longer there, usually because the mesh changed
 after the expression was authored, is reported rather than guessed at.
 
-An expression that also changes material colours or UVs keeps the blendshapes and reports the
-rest: VRM names the material to change, while Vixxy acts through a renderer.
 
 ## The avatar's licence
 

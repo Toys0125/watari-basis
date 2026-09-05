@@ -39,7 +39,11 @@ MonoBehaviour:
   - RelativePath: Face
     Index: 0
     Weight: 100
-  MaterialValues: []
+  MaterialValues:
+  - MaterialName: Face
+    ValueName: _Color
+    TargetValue: {x: 1, y: 0.5, z: 0.5, w: 1}
+    BaseValue: {x: 1, y: 1, z: 1, w: 1}
   IsBinary: 0
 --- !u!114 &11400002
 MonoBehaviour:

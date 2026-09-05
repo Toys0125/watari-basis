@@ -194,8 +194,64 @@ namespace yuna0x0.Basis.Convert.Tests
                 .Find(candidate => candidate.Choices[wink] > 0f);
             Assert.That(shape, Is.Not.Null);
             Assert.That(shape.Choices[wink], Is.EqualTo(75f).Within(0.01f));
-            Assert.That(plan.AllDiagnostics().HasCode("vrm.expression.materials"), Is.True,
-                "It also changes a material colour, which Vixxy cannot address the same way.");
+
+            // Wink also turns the Face material's emission red. Vixxy acts on the renderer that
+            // uses that material, so the property lands on the Face subject.
+            VixxyMaterialPropertyPlan emission = selector.Plan.Subjects[0].MaterialProperties
+                .Find(property => property.PropertyName == "_EmissionColor");
+            Assert.That(emission, Is.Not.Null,
+                "a VRM 1.0 emissionColor bind is MToon's _EmissionColor");
+            Assert.That(emission.Kind, Is.EqualTo(VixxyMaterialPropertyKind.Colour));
+            Assert.That(emission.Choices[wink], Is.EqualTo(new Vector4(1f, 0f, 0f, 1f)));
+            Assert.That(emission.Set[wink], Is.All.True);
+            Assert.That(emission.Set[0], Is.All.False,
+                "Other choices keep the material as authored, filled in from the material.");
+            Assert.That(emission.Choices[0], Is.EqualTo(new Vector4(0f, 0f, 0f, 1f)),
+                "The fixture material's emission is black.");
+            Assert.That(plan.AllDiagnostics().HasCode("vrm.expression.materialValues"), Is.True);
+            Assert.That(plan.AllDiagnostics().HasCode("vrm.expression.materials"), Is.False);
+        }
+
+        [Test]
+        public void AMaterialOnARendererWithOtherMaterialsIsLeftAlone()
+        {
+            // Vixxy sets a property for the whole renderer. Shifting one material's texture
+            // would shift every material on that renderer, so the bind is reported instead.
+            VrmExpressionData happy = new VrmExpressionData
+            {
+                Name = "Happy",
+                Role = VrmExpressionRole.Emotion,
+                Bindings =
+                {
+                    new VrmMorphBinding { Path = "Face", ShapeName = "Smile", Weight = 100f },
+                },
+                MaterialUvBindings =
+                {
+                    new VrmMaterialUvBinding
+                    {
+                        MaterialName = "Eyes", Offset = new Vector2(0.25f, 0f),
+                    },
+                },
+            };
+            Dictionary<string, List<VrmMaterialHost>> hosts =
+                new Dictionary<string, List<VrmMaterialHost>>
+            {
+                ["Eyes"] = new List<VrmMaterialHost>
+                {
+                    new VrmMaterialHost
+                    {
+                        Path = "Body", RendererTypeName = "R", OtherMaterials = 11,
+                    },
+                },
+            };
+
+            VixxyControlPlan plan = VrmExpressionToVixxyMapper.MapSelector(
+                new[] { happy }, null, hosts);
+
+            Assert.That(plan.Subjects.Count, Is.EqualTo(1), "only the blendshape subject");
+            Assert.That(plan.Subjects[0].MaterialProperties, Is.Empty);
+            Assert.That(plan.Diagnostics.HasCode("vrm.expression.materialShared"), Is.True);
+            Assert.That(plan.Diagnostics.HasCode("vrm.expression.materialValues"), Is.False);
         }
 
         [Test]
@@ -232,6 +288,14 @@ namespace yuna0x0.Basis.Convert.Tests
 
             Assert.That(selector.Plan.ChoiceNames, Does.Not.Contain("A"),
                 "A is a viseme, whatever the author called the clip.");
+
+            // 0.x names the shader property itself, and its colour is a plain Vector4.
+            VixxyMaterialPropertyPlan colour = selector.Plan.Subjects[0].MaterialProperties
+                .Find(property => property.PropertyName == "_Color");
+            Assert.That(colour, Is.Not.Null);
+            Assert.That(colour.Choices[joy], Is.EqualTo(new Vector4(1f, 0.5f, 0.5f, 1f)));
+            Assert.That(colour.Choices[0], Is.EqualTo(new Vector4(1f, 1f, 1f, 1f)),
+                "Neutral keeps the material's authored white.");
         }
 
         [Test]

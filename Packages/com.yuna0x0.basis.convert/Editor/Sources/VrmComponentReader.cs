@@ -449,9 +449,7 @@ namespace yuna0x0.Basis.Convert.Sources
             ReadBindings(serialized.FindProperty("MorphTargetBindings"), Vrm10WeightToUnity,
                 expression);
 
-            expression.MaterialBindingCount =
-                Count(serialized.FindProperty("MaterialColorBindings"))
-                + Count(serialized.FindProperty("MaterialUVBindings"));
+            ReadMaterialBindings(serialized, expression);
 
             expression.IsBinary = serialized.FindProperty("IsBinary")?.boolValue ?? false;
             expression.OverrideBlink = OverrideOf(serialized, "OverrideBlink");
@@ -459,6 +457,38 @@ namespace yuna0x0.Basis.Convert.Sources
             expression.OverrideMouth = OverrideOf(serialized, "OverrideMouth");
 
             return expression;
+        }
+
+        private static void ReadMaterialBindings(
+            SerializedObject serialized, VrmExpressionData expression)
+        {
+            SerializedProperty colours = serialized.FindProperty("MaterialColorBindings");
+            for (int i = 0; colours != null && colours.isArray && i < colours.arraySize; i++)
+            {
+                SerializedProperty entry = colours.GetArrayElementAtIndex(i);
+                expression.MaterialColorBindings.Add(new VrmMaterialColorBinding
+                {
+                    MaterialName =
+                        entry.FindPropertyRelative("MaterialName")?.stringValue ?? string.Empty,
+                    PropertyName = VrmMaterialProperties.NameOf(
+                        entry.FindPropertyRelative("BindType")?.enumValueIndex ?? -1),
+                    TargetValue =
+                        entry.FindPropertyRelative("TargetValue")?.vector4Value ?? Vector4.zero,
+                });
+            }
+
+            SerializedProperty uvs = serialized.FindProperty("MaterialUVBindings");
+            for (int i = 0; uvs != null && uvs.isArray && i < uvs.arraySize; i++)
+            {
+                SerializedProperty entry = uvs.GetArrayElementAtIndex(i);
+                expression.MaterialUvBindings.Add(new VrmMaterialUvBinding
+                {
+                    MaterialName =
+                        entry.FindPropertyRelative("MaterialName")?.stringValue ?? string.Empty,
+                    Scaling = entry.FindPropertyRelative("Scaling")?.vector2Value ?? Vector2.one,
+                    Offset = entry.FindPropertyRelative("Offset")?.vector2Value ?? Vector2.zero,
+                });
+            }
         }
 
         private static VrmExpressionOverride OverrideOf(SerializedObject serialized, string field)
