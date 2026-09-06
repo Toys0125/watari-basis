@@ -6,6 +6,13 @@ Notable changes to this package. The format follows
 
 ## [Unreleased]
 
+## [0.5.7] - 2026-09-06
+
+### Added
+
+- A VRM's eye rotation limit is read and, when it is below the 25 degrees Basis turns every
+  avatar's eyes to, reported: `vrm.lookAt.range`. Basis has no per-avatar limit to write it into.
+
 ## [0.5.6] - 2026-09-06
 
 ### Fixed
@@ -255,7 +262,8 @@ First release.
 - Two physics settings are fits rather than conversions, exposed as adjustable weights.
 - Component data is read from prefab files, so the avatar must still be linked to its prefab.
 
-[Unreleased]: https://github.com/yuna0x0/watari-basis/compare/v0.5.6...HEAD
+[Unreleased]: https://github.com/yuna0x0/watari-basis/compare/v0.5.7...HEAD
+[0.5.7]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.7
 [0.5.6]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.6
 [0.5.5]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.5
 [0.5.4]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.4
