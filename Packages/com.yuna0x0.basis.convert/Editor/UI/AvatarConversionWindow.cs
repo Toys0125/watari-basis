@@ -1150,6 +1150,13 @@ namespace yuna0x0.Basis.Convert.UI
                 + (_result.HeadChopsWritten > 0 ? $", {_result.HeadChopsWritten} head chops" : "")
                 + (_result.DescriptorWritten ? ", Basis Avatar." : "."));
 
+            if (_result.VrmRuntimeRemoved > 0)
+            {
+                WrappedLabel(
+                    $"Removed {_result.VrmRuntimeRemoved} UniVRM runtime components. They drove "
+                    + "the expressions, spring bones and look-at over what was written.");
+            }
+
             if (_result.MotionAssets.Count > 0)
             {
                 WrappedLabel(

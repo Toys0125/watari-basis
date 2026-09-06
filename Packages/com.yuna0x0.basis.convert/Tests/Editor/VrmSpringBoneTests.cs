@@ -255,6 +255,47 @@ namespace yuna0x0.Basis.Convert.Tests
         }
 
         [Test]
+        public void ConvertingRemovesUniVrmsRuntimeDriver()
+        {
+            // Vrm10Instance.LateUpdate writes every expression blendshape each frame, zeros
+            // included, and runs its own spring bones. Left on the avatar it undoes the
+            // conversion every frame, which showed as "nothing changes" on a real avatar.
+            AvatarConversionPlan plan = Plan(Vrm10Path);
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Vrm10Path);
+            GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            try
+            {
+                Assert.That(HasComponentNamed(instance, "Vrm10Instance"), Is.True,
+                    "the fixture carries a live Vrm10Instance while UniVRM is installed");
+
+                ConversionResult result = AvatarConverter.Apply(plan, instance);
+
+                Assert.That(result.VrmRuntimeRemoved, Is.EqualTo(1));
+                Assert.That(HasComponentNamed(instance, "Vrm10Instance"), Is.False);
+                Assert.That(HasComponentNamed(instance, "VRM10SpringBoneJoint"), Is.True,
+                    "data components stay for a later conversion");
+                Assert.That(result.Diagnostics.HasCode("vrm.runtimeRemoved"), Is.True);
+            }
+            finally
+            {
+                Object.DestroyImmediate(instance);
+            }
+        }
+
+        private static bool HasComponentNamed(GameObject root, string typeName)
+        {
+            foreach (Component component in root.GetComponentsInChildren<Component>(true))
+            {
+                if (component != null && component.GetType().Name == typeName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        [Test]
         public void ExpressionsBasisDrivesItselfAreLeftToIt()
         {
             // The lip sync shapes, blinking and looking around are driven by Basis. A choice

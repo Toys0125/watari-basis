@@ -40,6 +40,11 @@ next. Then `agent/decisions/`. The short version of how this works:
 - **Read the output, not just the test results.** A wide angle limit clamping to a tighter one,
   and duplicate collider diagnostics, were both found by reading a generated report while every
   test passed.
+- **Ask what else writes the property.** A converted VRM's Expression selector was right in every
+  field and did nothing, because UniVRM's `Vrm10Instance` was still on the avatar rewriting every
+  expression blendshape each frame. A plan or component that looks correct is not verified until
+  the other runtime writers of the same property are known: the source's own runtime, Basis's
+  drivers, anything with an Update.
 - **Fix the class, not the instance.** `EditorGUILayout.LabelField` sizes its rect to one line
   whatever style it is handed. Told about four clipped fields, one session fixed those four;
   the other ten came back as a bug report. When a fault is a misused API, grep for every call.

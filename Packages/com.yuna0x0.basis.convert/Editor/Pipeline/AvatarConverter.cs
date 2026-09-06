@@ -18,6 +18,12 @@ namespace yuna0x0.Basis.Convert.Pipeline
         public int ConstraintsSkipped;
         public bool DescriptorWritten;
         public int HeadChopsWritten;
+
+        /// <summary>
+        /// UniVRM runtime components taken off the converted avatar. Left in place, they keep
+        /// driving expressions, spring bones and look-at every frame over what was written.
+        /// </summary>
+        public int VrmRuntimeRemoved;
         public int VixxyControlsWritten;
         public int AuthoredMotionsWritten;
 
@@ -160,9 +166,62 @@ namespace yuna0x0.Basis.Convert.Pipeline
                 WriteAuthoredMotions(plan, roots, target, undoName, result);
 
             WriteVixxyControls(plan, roots, target, motions, undoName, result);
+            RemoveVrmRuntime(target, undoName, result);
 
             Undo.CollapseUndoOperations(group);
             return result;
+        }
+
+        /// <summary>
+        /// UniVRM's runtime drivers, by type name so the package does not depend on UniVRM.
+        /// `Vrm10Instance.LateUpdate` calls `Runtime.Process`, which writes every expression's
+        /// blendshapes each frame, zeros included, simulates its own spring bones and aims the
+        /// eyes; the 0.x components do the same from their own Update. Any of them left on the
+        /// converted avatar undoes the Vixxy controls and the jiggle rigs every frame. The data
+        /// components (joints, colliders, constraints, expressions) stay: they hold no behaviour
+        /// without the driver, a later conversion reads them, and Basis strips them at build.
+        /// </summary>
+        private static readonly HashSet<string> VrmRuntimeTypeNames = new HashSet<string>
+        {
+            "Vrm10Instance",
+            "VRMSpringBone",
+            "VRMBlendShapeProxy",
+            "VRMLookAtHead",
+            "VRMLookAtBoneApplyer",
+            "VRMLookAtBlendShapeApplyer",
+        };
+
+        private static void RemoveVrmRuntime(
+            Transform target, string undoName, ConversionResult result)
+        {
+            List<Component> drivers = new List<Component>();
+            foreach (Component component in target.GetComponentsInChildren<Component>(true))
+            {
+                if (component != null && VrmRuntimeTypeNames.Contains(component.GetType().Name))
+                {
+                    drivers.Add(component);
+                }
+            }
+
+            if (drivers.Count == 0)
+            {
+                return;
+            }
+
+            HashSet<string> names = new HashSet<string>();
+            foreach (Component driver in drivers)
+            {
+                names.Add(driver.GetType().Name);
+                Undo.DestroyObjectImmediate(driver);
+                result.VrmRuntimeRemoved++;
+            }
+
+            Undo.SetCurrentGroupName(undoName);
+            result.Diagnostics.Add(DiagnosticSeverity.Mapped, "vrm.runtimeRemoved",
+                $"{result.VrmRuntimeRemoved} UniVRM runtime components were removed from the "
+                + $"converted avatar ({string.Join(", ", names)}). They drove the expressions, "
+                + "spring bones and look-at every frame over what was written. Undo restores "
+                + "them; Basis strips them at build in any case.");
         }
 
         private static void WriteHeadChops(

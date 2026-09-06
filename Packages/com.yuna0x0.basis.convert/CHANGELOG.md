@@ -6,6 +6,15 @@ Notable changes to this package. The format follows
 
 ## [Unreleased]
 
+## [0.5.5] - 2026-09-06
+
+### Fixed
+
+- A converted VRM did nothing visible: UniVRM's `Vrm10Instance` stayed on the avatar and rewrote
+  every expression blendshape each frame, zeros included, and ran its own spring bones and
+  look-at over the conversion. Conversion now removes UniVRM's runtime drivers, 0.x ones
+  included, and says so: `vrm.runtimeRemoved`. Undo restores them.
+
 ## [0.5.4] - 2026-09-06
 
 ### Added
@@ -238,7 +247,8 @@ First release.
 - Two physics settings are fits rather than conversions, exposed as adjustable weights.
 - Component data is read from prefab files, so the avatar must still be linked to its prefab.
 
-[Unreleased]: https://github.com/yuna0x0/watari-basis/compare/v0.5.4...HEAD
+[Unreleased]: https://github.com/yuna0x0/watari-basis/compare/v0.5.5...HEAD
+[0.5.5]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.5
 [0.5.4]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.4
 [0.5.3]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.3
 [0.5.2]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.2

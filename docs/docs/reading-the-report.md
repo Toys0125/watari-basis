@@ -55,6 +55,7 @@ produces sixty identical notes, which is unreadable one by one and useful as a c
 | `vrm.lookAt` | VRM 0.x look at components were found. Basis drives gaze from the eye bones itself. |
 | `vrm.stiffness` | A VRM chain's stiffness force was fitted onto jiggle stiffness, which is a narrower scale. |
 | `vrm.branchesExcluded` | Bones hanging off a VRM chain that the spring never named were excluded, so they stay as still as VRM left them. |
+| `vrm.runtimeRemoved` | UniVRM's runtime drivers were removed from the converted avatar. They rewrote expressions, spring bones and look-at every frame over what was written. |
 | `vrm.expressionsRebuilt` | The avatar's expressions became one Vixxy selector named Expression: Neutral, then one choice each. |
 | `vrm.expressionsDriven` | Visemes, blink and look-at expressions were left to Basis, which drives those itself. |
 | `vrm.expression.materialValues` | An expression's material changes were written on the renderers that use the materials it names. |

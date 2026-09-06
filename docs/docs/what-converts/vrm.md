@@ -39,6 +39,14 @@ reads through the 1.0 path whichever version it was written as. UniVRM 0.x inste
 prefab beside the `.vrm` as it imports; convert that prefab. The 0.x path also covers prefabs
 made with an older UniVRM.
 
+## UniVRM's runtime is removed
+
+A converted VRM keeps UniVRM's data components, but its runtime drivers come off: `Vrm10Instance`
+for 1.0, and `VRMSpringBone`, `VRMBlendShapeProxy` and the look-at components for 0.x. Left in
+place they write every expression blendshape each frame, zeros included, simulate their own
+spring bones and aim the eyes, so the Vixxy controls and jiggle rigs would be undone every frame.
+Basis strips them at build in any case. Undo restores them: `vrm.runtimeRemoved`.
+
 ## What carries across
 
 | VRM | Basis jiggle |

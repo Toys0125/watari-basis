@@ -111,6 +111,12 @@ namespace yuna0x0.Basis.Convert.Reporting
             if (result != null)
             {
                 text.AppendLine($"- Written: {result.TotalWritten}");
+                if (result.VrmRuntimeRemoved > 0)
+                {
+                    text.AppendLine(
+                        $"- UniVRM runtime components removed: {result.VrmRuntimeRemoved}");
+                }
+
                 if (result.TotalSkipped > 0)
                 {
                     text.AppendLine($"- Skipped while writing: {result.TotalSkipped}");
