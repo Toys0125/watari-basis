@@ -240,7 +240,12 @@ What the spec says that the code did not yet reflect:
   emissionColor, shadeColor, matcapColor, rimColor, outlineColor; uv scale and offset). Still
   dropped with a diagnostic; an expression made only of them is now reported too. Seed-san's five
   emotions each carry one. Mapping them would mean finding the renderers that use the material
-  and writing Vixxy material properties with MToon's shader property names.
+  and writing Vixxy material properties with MToon's shader property names. Done in 0.5.4, with
+  one limit checked in Vixxy's source (2026-09-06): `HVRVixxyOrchestrator.Apply` keeps one
+  `MaterialPropertyBlock` per renderer and calls `Renderer.SetPropertyBlock(block)` without a
+  material index, and neither `HVRVixxySubject` nor `HVRVixxyPropertyBase` can name a slot. A
+  property therefore reaches every material on the renderer, so a bind whose material shares its
+  renderer is reported (`vrm.expression.materialShared`) rather than written.
 
 What matched: spring joint fields and their meaning, tail joints carrying no parameters,
 `center`, sphere and capsule colliders with offset and tail, the extended inside and plane
