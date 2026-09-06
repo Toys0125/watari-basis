@@ -6,6 +6,13 @@ Notable changes to this package. The format follows
 
 ## [Unreleased]
 
+## [0.5.8] - 2026-09-07
+
+### Changed
+
+- Report messages for the stiffness and drag fits, and for arm bones without a twist child,
+  state the fit and stop.
+
 ## [0.5.7] - 2026-09-06
 
 ### Added
@@ -262,7 +269,8 @@ First release.
 - Two physics settings are fits rather than conversions, exposed as adjustable weights.
 - Component data is read from prefab files, so the avatar must still be linked to its prefab.
 
-[Unreleased]: https://github.com/yuna0x0/watari-basis/compare/v0.5.7...HEAD
+[Unreleased]: https://github.com/yuna0x0/watari-basis/compare/v0.5.8...HEAD
+[0.5.8]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.8
 [0.5.7]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.7
 [0.5.6]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.6
 [0.5.5]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.5
