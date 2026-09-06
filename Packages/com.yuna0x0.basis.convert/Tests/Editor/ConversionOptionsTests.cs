@@ -164,7 +164,7 @@ namespace yuna0x0.Basis.Convert.Tests
             JiggleRig[] rigs = _instance.GetComponentsInChildren<JiggleRig>(true);
             Assert.That(rigs.Length, Is.EqualTo(1));
             Assert.That(rigs[0].GetJiggleRigData().jiggleColliders, Is.Empty,
-                "The rig is written; its bones simply pass through the body.");
+                "The rig is written without colliders.");
         }
 
         [Test]

@@ -20,8 +20,7 @@ it:
 | Menu toggles | HVR Vixxy controls and their menu items, from menu toggles and VRM expressions |
 | Authored motion | `BasisAuthoredMotion`, with a clip baked from each always-on animator layer |
 
-A row is greyed out when the avatar has nothing of that kind, so an empty checkbox always means a
-choice rather than an absence.
+A row is greyed out when the avatar has nothing of that kind.
 
 Authored motion is the one row that writes an asset into the project, the baked clip, which stays
 there if you undo the conversion. See [Authored motion](what-converts/authored-motion.md).
@@ -38,7 +37,7 @@ there if you undo the conversion. See [Authored motion](what-converts/authored-m
 
 - **Colliders**, under Physics. Rigs are still written without them, and their bones pass through
   the body instead of resting on it.
-- **A checkbox per prefab**, so an accessory parented onto an avatar is not converted with it. Prefabs
+- **A checkbox per prefab**, so an accessory parented onto an avatar can be left out. Prefabs
   that hold nothing convertible are summarised rather than listed.
 - **A checkbox per rig, constraint, toggle and motion**, each with what it affects.
 - **The tuning weights** described in [Physics](what-converts/physics.md).

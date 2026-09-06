@@ -153,6 +153,31 @@ asset an undo will not remove. Nothing that explains what a button obviously doe
 reassures, no "you can", no "simply", no "check by eye". "Convert writes components you can
 tune by hand. One undo reverts all of it" was shipped and had to be removed.
 
+## Public project, not a local notebook
+
+This is an open source package other people install. Nothing that applies only to one
+contributor's machine, clone or upgrade path goes into docs, code, comments, changelog, tests or
+fixtures.
+
+- **No local deltas.** "1.3.4 differs from 1.3.2 only in when it disables its own
+  multithreading" describes one clone's upgrade and shipped in `versions.md`. Docs state what a
+  source release adds and what becomes of it on Basis. Which version a contributor upgraded from
+  belongs in the worklog, if anywhere.
+- **No local paths, clone layouts, remotes, branch names or account details.** Write
+  `/path/to/...`. Assume no tool beyond what `CONTRIBUTING.md` names.
+- **Facts about a release are checked against its release notes or source**, not against what
+  happened to be installed before. See "Someone else's UI is not guessable".
+
+## Professional prose
+
+Every public artifact reads as technical documentation: docs, READMEs, changelog, release notes,
+editor UI, report messages, commit messages. No filler, no chat, no reassurance, no commentary on
+the reader or on the project's own choices, no rhetorical reversals, no colloquialisms. "Write
+short" is the mechanics; this is the bar it serves. Shipped and removed: "Check by eye." in
+three report messages, "without one it simply does not apply twist there, which is not a fault",
+"a control that looks finished and does half the job is worse than none", "and both are yours to
+judge".
+
 ## Trademark
 
 Basis, BasisVR and Basis Framework are trademarks of the Basis Project. Their policy permits

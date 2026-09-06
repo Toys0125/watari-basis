@@ -10,9 +10,10 @@ const features = [
     description: (
       <>
         PhysBones, VRM spring bones and Dynamic Bone become Basis jiggle physics, VRChat and
-        VRM constraints become their Basis equivalents, the avatar descriptor becomes a{' '}
-        <code>BasisAvatar</code>, menu toggles and VRM expressions are rebuilt as HVR Vixxy
-        controls, and animation that plays on its own becomes authored motion.
+        VRM constraints become their Basis equivalents, the avatar descriptor and head chop become{' '}
+        <code>BasisAvatar</code> and <code>BasisHeadChop</code>, menu toggles and VRM expressions
+        are rebuilt as HVR Vixxy controls, and animation that plays on its own becomes authored
+        motion.
       </>
     ),
   },
@@ -29,11 +30,11 @@ const features = [
   },
   {
     Icon: Eye,
-    title: 'Nothing lost quietly',
+    title: 'Approximations reported',
     description: (
       <>
-        Anything approximated or dropped is reported with a reason before you convert. Nothing is
-        written until you confirm, and one undo reverts the components a conversion wrote.
+        Anything approximated or dropped is reported with a reason before anything is written, under
+        a stable code. One undo reverts the components a conversion wrote.
       </>
     ),
   },

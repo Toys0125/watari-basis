@@ -5,8 +5,8 @@ sidebar_position: 8
 # Rig check
 
 Alongside the conversion, the humanoid rig is checked against what Basis's full-body IK expects.
-Nothing here is converted: these are settings on the model, and the report says which ones will
-give Basis trouble.
+Nothing here is converted: these are settings on the model, and the report says which ones
+Basis's IK cannot work with.
 
 - **The bone mapping is complete**, and the Animation Type is Humanoid, which Basis requires.
 - **The Jaw bone is not mapped.** The Basis setup guide asks for it to be cleared on imported

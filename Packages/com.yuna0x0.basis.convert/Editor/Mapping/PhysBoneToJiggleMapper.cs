@@ -65,9 +65,9 @@ namespace yuna0x0.Basis.Convert.Mapping
             log.Add(DiagnosticSeverity.Approximated, "physbone.pull.stiffness",
                 advanced
                     ? $"pull {source.Pull.Value} and stiffness {source.Stiffness.Value} became "
-                        + $"jiggle stiffness {parameters.Stiffness.Value.Value}. Check by eye."
+                        + $"jiggle stiffness {parameters.Stiffness.Value.Value}, as a fit."
                     : $"pull {source.Pull.Value} became jiggle stiffness "
-                        + $"{parameters.Stiffness.Value.Value}. Check by eye.");
+                        + $"{parameters.Stiffness.Value.Value}, as a fit.");
 
             if (advanced && source.Stiffness.HasCurve)
             {
@@ -93,7 +93,7 @@ namespace yuna0x0.Basis.Convert.Mapping
             log.Add(DiagnosticSeverity.Approximated, "physbone.spring.drag",
                 $"spring {source.Spring.Value} became jiggle drag {drag}. "
                 + "Spring and drag are inverses but their scales differ, so this is a fit, not "
-                + "a conversion. Check by eye.");
+                + "a conversion.");
         }
 
         private static void MapImmobile(PhysBoneData source, JiggleParameterPlan parameters,

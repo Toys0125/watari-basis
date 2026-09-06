@@ -34,17 +34,16 @@ Two settings do not mean the same thing on both sides and are fits rather than c
 - **Stiffness**, from VRChat's pull and stiffness.
 - **Drag**, from VRChat's spring.
 
-Both are exposed under **Advanced** in the window, as weights you can adjust before rescanning.
-Everything else is a direct mapping, so these are the ones to reach for if the result feels wrong.
+Both are exposed under **Advanced** in the window, as weights to adjust before rescanning.
+Everything else is a direct mapping.
 
-Values the source does not determine are taken from the jiggle physics package's own presets, so
-they start at values its author tuned. The preset per rig is guessed from the bone's name and can
-be changed in the window.
+Values the source does not determine are taken from the jiggle physics package's own presets.
+The preset per rig is guessed from the bone's name and can be changed in the window.
 
 ## What does not carry across
 
 - Angle limits wider than jiggle physics can express. No limit is written rather than a tighter
-  one, since a bone that is suddenly more constrained is worse than one that is less.
+  one.
 - Polar limits, which are approximated to a single angle.
 - Gravity falloff, max squish, endpoint positions, and per-axis limit rotations.
 - `Is Animated`, and anything driven by a PhysBone parameter.

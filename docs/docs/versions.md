@@ -11,23 +11,28 @@ the same versions.
 
 | Source | Checked against |
 |---|---|
-| VRChat SDK | 3.10.5, released 2026-09-04 |
+| VRChat SDK | 3.10.5 |
 | UniVRM | 0.131.2 |
 | Dynamic Bone | 1.3.4 |
 | Modular Avatar | 1.18.7, with NDMF 1.14.8 |
-| Basis | the `developer` branch as of 2026-09-05 |
+| Basis | the `developer` branch as of 2026-09-06 |
 
-## What the VRChat SDK added since 3.8
+## VRChat SDK
 
-Every avatar component and field in 3.10.5 was compared with 3.8.0. The descriptor, expression
-menus and parameters, and the six constraints did not change. What did:
+Avatar components and what becomes of each on Basis. The SDK release that added a component is
+given where the release notes state it.
 
-- **Global PhysBone colliders** (3.10.4) are reported as `collider.global.dropped`.
-- **Box-shaped contacts** (3.10.4) join the other contacts under `contacts.dropped`.
-- **VRC Raycast** (3.10.3) is reported as `raycast.dropped`.
-- **Per-platform overrides** (3.8.1) and impostor settings are reported as `vrchat.buildSettings`.
-- **VRC Head Chop** (3.6.0) converts to a Basis Head Chop. See
-  [Avatar descriptor](what-converts/avatar-descriptor.md).
+| Component | On Basis |
+|---|---|
+| Avatar descriptor | Converts to a Basis Avatar. See [Avatar descriptor](what-converts/avatar-descriptor.md) |
+| PhysBones and colliders | Convert to jiggle physics. See [Physics](what-converts/physics.md) |
+| Expression menu and parameters | Toggles, selectors and radials are rebuilt as Vixxy controls. See [Menu toggles](what-converts/menu-toggles.md) |
+| Contacts, box-shaped ones included (3.10.4) | Reported as `contacts.dropped` |
+| VRC Head Chop | Converts to a Basis Head Chop |
+| Constraints, all six types (3.7.0) | Convert to Basis constraints |
+| Per-platform overrides (3.8.1) and impostor settings | Reported as `vrchat.buildSettings` |
+| VRC Raycast (3.10.3) | Reported as `raycast.dropped` |
+| Global PhysBone colliders (3.10.4) | Reported as `collider.global.dropped` |
 
 ## VRM
 
@@ -36,13 +41,7 @@ and VRMC_springBone 1.0, and against the consortium's sample models: Seed-san, t
 twist sample, the two isBinary conformance models, the MToon UV animation test, and Alicia 0.51.
 All six read and plan without an unrecognised component.
 
-## Dynamic Bone
-
-1.3.4 differs from 1.3.2 only in when it disables its own multithreading. The serialized
-fields, and the script guids the readers match on, are unchanged.
-
 ## Modular Avatar
 
-Every component 1.18.7 ships is named. The vertex filters that go with Mesh Cutter, and Move
-Independently, are mesh and hierarchy work Modular Avatar does on Basis itself, and are listed
-with the rest of that kind.
+Every component 1.18.7 ships is recognised. See [Modular Avatar](what-converts/modular-avatar.md)
+for which are rebuilt, which are left to Modular Avatar and which are reported.

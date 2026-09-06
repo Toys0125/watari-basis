@@ -73,9 +73,9 @@ leaves behind. See [Authored motion](what-converts/authored-motion.md).
 Press **Test In Editor** on the `BasisAvatar` component. Jiggle physics and authored motion both
 run only once an avatar is calibrated, so plain Play mode will not show anything moving.
 
-Watch the hair, tail and skirt next to how they behaved before. Two parts of the physics mapping
-are fits rather than conversions, and are the ones worth adjusting if the result feels wrong:
-see [Physics](what-converts/physics.md).
+Compare the hair, tail and skirt with how they behaved before. Stiffness and drag are fits
+rather than conversions and can be adjusted under **Advanced**: see
+[Physics](what-converts/physics.md).
 
 ## Adding clothing later
 

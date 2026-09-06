@@ -30,7 +30,7 @@ a reason before anything is written.
 - Your avatar imported into it, still linked to its prefab.
 
 The VRChat SDK is not needed and should not be installed. Its components arrive as missing
-scripts in a Basis project, and that is exactly what this reads.
+scripts in a Basis project, which is what this reads.
 
 ## What to read next
 

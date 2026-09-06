@@ -190,8 +190,8 @@ namespace yuna0x0.Basis.Convert.Rig
             {
                 log.Add(DiagnosticSeverity.Mapped, "rig.twistBonesAbsent",
                     $"No twist child under {string.Join(", ", without)}. Basis looks for a direct "
-                    + "child whose name contains \"twist\" or \"roll\"; without one it simply "
-                    + "does not apply twist there, which is not a fault.");
+                    + "child whose name contains \"twist\" or \"roll\", and applies no twist where "
+                    + "there is none.");
             }
         }
 

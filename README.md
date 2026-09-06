@@ -16,8 +16,8 @@ needs.
 
 Clothing and accessories convert with the avatar they are worn on.
 
-Nothing is written until you press Convert, and one undo reverts it. Anything that cannot come
-across cleanly is listed first.
+Anything approximated or dropped is reported before anything is written. One undo reverts the
+components a conversion wrote.
 
 Documentation: **https://yuna0x0.github.io/watari-basis/**
 
@@ -40,7 +40,7 @@ With [OpenUPM](https://openupm.com/):
 openupm add com.yuna0x0.basis.convert
 ```
 
-Or by git URL, in Unity's Package Manager under `Add package from git URL`:
+Or by git URL, in Unity's Package Manager under **Install package from git URL**:
 
 ```
 https://github.com/yuna0x0/watari-basis.git?path=/Packages/com.yuna0x0.basis.convert

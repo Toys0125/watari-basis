@@ -5,10 +5,9 @@ the name given, then replace the comment in that page with the markdown the comm
 
 | File | Page | What it should show |
 |---|---|---|
-| `favicon.ico` | site-wide | Site icon. Referenced by `docusaurus.config.js`. |
 | `install-package-manager.webp` | Installing | Unity's Package Manager with the git URL filled in. |
 | `window-converted.webp` | Converting an avatar | The window after converting, with the result line. |
-| `options-basic.webp` | Conversion options | The What to convert section with its checkboxes and counts. |
+| `options-basic.webp` | Conversion options | The Targets section with its checkboxes and counts. |
 | `options-advanced.webp` | Conversion options | The advanced view with the prefab and per-item lists open. |
 
 Screenshots of the window read best cropped to the window itself, taken on the dark editor theme,

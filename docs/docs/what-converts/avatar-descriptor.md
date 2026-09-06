@@ -42,4 +42,4 @@ expression menu and parameters, which are a separate subject: see
 VRC Raycast components fire a ray and set animator parameters from what it hits. Basis has nothing
 that does this, so they are reported as `raycast.dropped`. Per-platform overrides and impostor
 settings are instructions to VRChat's uploader with no behaviour of their own, reported as
-`vrchat.buildSettings` and lost nothing.
+`vrchat.buildSettings`.

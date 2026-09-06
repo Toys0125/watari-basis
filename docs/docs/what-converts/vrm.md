@@ -19,12 +19,12 @@ or newer: 0.131.0 does not compile on the Unity version Basis targets.
 
 Drag the imported avatar into a scene and convert it. It does not need unpacking, and its assets
 do not need extracting. A prefab saved from it without unpacking converts too, and the report
-names the file it was read from as `source.modelRead`. A `.vrm` is binary, so there is no text to read; its spring bones,
-constraints, expressions, licence and eye offset are read from the components instead, which
-UniVRM has to be installed for anyway.
+names the file it was read from as `source.modelRead`. A `.vrm` is binary, so there is no text
+to read; its spring bones, constraints, expressions, licence and eye offset are read from the
+components instead.
 
-UniVRM's own components are not on the Basis allow-list, so Basis strips them when the avatar
-loads and the converted jiggle physics takes over.
+UniVRM's data components stay on the converted avatar. They are not on the Basis allow-list, so
+the Basis build strips them.
 
 ## The two formats
 
@@ -114,8 +114,8 @@ A permission the format has no field for is left out rather than guessed at. VRM
 political or antisocial fields, and no redistribution or credit fields; VRM 1.0 has all of them.
 
 The licence is a warning when it forbids changing the avatar or limits who may wear it. Nothing
-is blocked: converting changes an avatar and using it on Basis is a use, and both are yours to
-judge.
+is blocked. Converting changes an avatar, and using it on Basis is a use; check the licence
+allows both.
 
 ## Constraints
 

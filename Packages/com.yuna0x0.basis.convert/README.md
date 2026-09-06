@@ -5,7 +5,7 @@ constraints, menus and motion intact.
 
 - **VRChat PhysBones, VRM spring bones and legacy Dynamic Bone** become Basis jiggle physics
 - **VRChat and VRM constraints** become their Basis equivalents
-- **The avatar descriptor** becomes a `BasisAvatar` component
+- **The avatar descriptor and head chop** become `BasisAvatar` and `BasisHeadChop` components
 - **Menu toggles, selectors, radial puppets and VRM expressions** become HVR Vixxy controls
 - **Animation that plays on its own** becomes authored motion, baked to a clip
 

@@ -3,8 +3,9 @@
 ## Setting up
 
 You need a Basis project to build against: the package references the Basis SDK, Jiggle Physics
-and HVR Basis Comms, all of which ship inside the Basis repository. Clone [BasisVR/Basis](https://github.com/BasisVR/Basis) and open the
-`Basis/` subfolder as the Unity project, not the repository root. Use the editor version in that
+and HVR Basis Comms, all of which ship inside the Basis repository. Clone
+[BasisVR/Basis](https://github.com/BasisVR/Basis) and open the `Basis/` subfolder as the Unity
+project, not the repository root. Use the editor version in that
 project's `ProjectSettings/ProjectVersion.txt`; Basis moves between editor versions and the
 package follows it rather than pinning one.
 
@@ -40,15 +41,15 @@ the writers touch Unity objects.
 Fixtures live in `Tests/Editor/Fixtures`. `SampleAvatar` is an avatar the package ships: a
 prefab carrying a descriptor, a head chop, a PhysBone, a constraint, a raycast and a
 per-platform override as the missing scripts they arrive as, plus an expression menu,
-parameters, an animator and its clips. Between them the menu and the
-animator cover a plain toggle, a selector sharing one parameter, a radial puppet, a toggle
-guarded by one of VRChat's own parameters, a toggle whose clip animates over time, and a layer
-with nothing steering it. `SampleClothing` is the Modular Avatar half, and `SampleVrmAvatar` holds one avatar per VRM
-format, each with a humanoid rig, a face with the blendshapes its expressions bind to, and its
-own expressions, licence, eye offset and spring bones. Their `Avatar` and mesh assets are
-generated, since a rig Unity validates and blendshape frames cannot be hand-written. Prefer extending these
-over reaching for a real avatar, so the suite means something on a machine that has no purchased
-assets. The animator half, and the VRM fixtures' rig and face, are generated through
+parameters, an animator and its clips. Between them the menu and the animator cover a plain
+toggle, a selector sharing one parameter, a radial puppet, a toggle guarded by one of VRChat's
+own parameters, a toggle whose clip animates over time, and a layer with nothing steering it.
+`SampleClothing` is the Modular Avatar half. `SampleVrmAvatar` holds one avatar per VRM format,
+each with a humanoid rig, a face with the blendshapes its expressions bind to, and its own
+expressions, licence, eye offset and spring bones. Their `Avatar` and mesh assets are generated,
+since a rig Unity validates and blendshape frames cannot be hand-written. Prefer extending these
+over reaching for a real avatar, so the suite runs on a machine that has no purchased assets.
+The animator half, and the VRM fixtures' rig and face, are generated through
 `Tools/Watari/Development/Regenerate Test Fixtures`, because hand-writing a state machine
 produces files that look right and do not load. The generated assets are committed; tests do not
 run the generator.
@@ -68,7 +69,7 @@ PascalCase public members, `_camelCase` private fields, plain public fields over
 Log through `BasisDebug` with a tag rather than `Debug.Log`.
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/), as Basis
-does. Describe what changed and why; skip tool or process detail.
+does. Describe what changed; skip tool or process detail.
 
 ## Things worth knowing before you change something
 

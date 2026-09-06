@@ -63,5 +63,4 @@ is reported as `vixxy.puppetEnds`.
   parameter list to recreate, and anything driven by parameters outside a toggle has to be
   rebuilt by hand.
 
-A toggle that cannot be rebuilt is reported rather than half converted: a control that looks
-finished and does half the job is worse than none.
+A toggle that cannot be rebuilt is reported and left alone rather than partly converted.

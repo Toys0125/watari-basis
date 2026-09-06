@@ -95,7 +95,7 @@ namespace yuna0x0.Basis.Convert.Mapping
             parameters.Stiffness = new JiggleCurvedFloatPlan(stiffness, source.Elasticity.Curve);
             log.Add(DiagnosticSeverity.Approximated, "dynamicbone.elasticity.stiffness",
                 $"elasticity {source.Elasticity.Value} and stiffness {source.Stiffness.Value} "
-                + $"became jiggle stiffness {stiffness}. Check by eye.");
+                + $"became jiggle stiffness {stiffness}, as a fit rather than a conversion.");
 
             // Damping and drag are both damping on the same scale, so this one is direct.
             parameters.Drag = new JiggleCurvedFloatPlan(
