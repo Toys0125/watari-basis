@@ -26,6 +26,8 @@ namespace yuna0x0.Basis.Convert.Pipeline
         public int VrmRuntimeRemoved;
         public int VixxyControlsWritten;
         public int AuthoredMotionsWritten;
+        public int PoiyomiMaterialsWritten;
+        public int PoiyomiMaterialsSkipped;
 
         /// <summary>Baked motion clips written to the project, which an undo does not remove.</summary>
         public List<string> MotionAssets = new List<string>();
@@ -34,8 +36,8 @@ namespace yuna0x0.Basis.Convert.Pipeline
 
         public int TotalWritten =>
             RigsWritten + ConstraintsWritten + VixxyControlsWritten + AuthoredMotionsWritten
-            + HeadChopsWritten + (DescriptorWritten ? 1 : 0);
-        public int TotalSkipped => RigsSkipped + ConstraintsSkipped;
+            + PoiyomiMaterialsWritten + HeadChopsWritten + (DescriptorWritten ? 1 : 0);
+        public int TotalSkipped => RigsSkipped + ConstraintsSkipped + PoiyomiMaterialsSkipped;
     }
 
     /// <summary>
@@ -166,10 +168,30 @@ namespace yuna0x0.Basis.Convert.Pipeline
                 WriteAuthoredMotions(plan, roots, target, undoName, result);
 
             WriteVixxyControls(plan, roots, target, motions, undoName, result);
+            WritePoiyomiMaterials(plan, undoName, result);
             RemoveVrmRuntime(target, undoName, result);
 
             Undo.CollapseUndoOperations(group);
             return result;
+        }
+
+        private static void WritePoiyomiMaterials(
+            AvatarConversionPlan plan, string undoName, ConversionResult result)
+        {
+            foreach (PlannedPoiyomiMaterial planned in plan.SelectedPoiyomiMaterials())
+            {
+                if (planned.Material == null || planned.TargetShader == null
+                    || !PoiyomiMaterialWriter.Write(
+                        planned.Material, planned.TargetShader, undoName))
+                {
+                    result.PoiyomiMaterialsSkipped++;
+                    result.Diagnostics.Add(DiagnosticSeverity.Warning, "apply.poiyomiMaterial",
+                        $"'{planned.Describe()}' could not be remapped to Poiyomi URP.");
+                    continue;
+                }
+
+                result.PoiyomiMaterialsWritten++;
+            }
         }
 
         /// <summary>

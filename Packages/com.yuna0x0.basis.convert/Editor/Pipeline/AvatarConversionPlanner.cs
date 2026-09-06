@@ -512,6 +512,8 @@ namespace yuna0x0.Basis.Convert.Pipeline
                 return;
             }
 
+            PoiyomiMaterialPlanner.Inspect(plan);
+
             if (plan.ModularAvatarHierarchyFound > 0)
             {
                 plan.Diagnostics.Add(DiagnosticSeverity.Mapped, "modularAvatar.hierarchy",

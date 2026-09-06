@@ -92,6 +92,8 @@ namespace yuna0x0.Basis.Convert.Reporting
             text.AppendLine($"- Colliders found: {plan.CollidersFound}");
             text.AppendLine($"- Constraints found: {plan.ConstraintsFound}");
             text.AppendLine($"- Head chops found: {plan.HeadChopsFound}");
+            text.AppendLine($"- Poiyomi materials needing URP: {plan.PoiyomiMaterialsFound}");
+            text.AppendLine($"- Poiyomi URP remaps ready: {plan.PoiyomiUrpReadyCount}");
             text.AppendLine($"- Jiggle rigs planned: {plan.Rigs.Count}");
             text.AppendLine($"- Basis constraints planned: {plan.Constraints.Count}");
             text.AppendLine($"- Vixxy controls planned: {plan.VixxyControls.Count}");
@@ -111,6 +113,11 @@ namespace yuna0x0.Basis.Convert.Reporting
             if (result != null)
             {
                 text.AppendLine($"- Written: {result.TotalWritten}");
+                if (result.PoiyomiMaterialsWritten > 0)
+                {
+                    text.AppendLine($"- Poiyomi materials remapped: {result.PoiyomiMaterialsWritten}");
+                }
+
                 if (result.VrmRuntimeRemoved > 0)
                 {
                     text.AppendLine(
@@ -154,6 +161,26 @@ namespace yuna0x0.Basis.Convert.Reporting
                 foreach (DiagnosticGroup group in section)
                 {
                     text.AppendLine($"- **{group.Code}** ({group.Count}): {group.Example}");
+                }
+
+                text.AppendLine();
+            }
+
+            if (plan.PoiyomiMaterials.Count > 0)
+            {
+                text.AppendLine("## Poiyomi materials");
+                text.AppendLine();
+                foreach (PlannedPoiyomiMaterial material in plan.PoiyomiMaterials)
+                {
+                    string target = material.TargetShader != null
+                        ? material.TargetShader.name
+                        : "Poiyomi URP missing";
+                    string state = material.TargetShader == null
+                        ? "  (not ready)"
+                        : Suffix(plan.Options.Materials && material.Include
+                            && AllSourcesIncluded(material));
+                    text.AppendLine($"- {material.Describe()}: {material.SourceShaderName} → {target}"
+                        + state);
                 }
 
                 text.AppendLine();
@@ -252,6 +279,17 @@ namespace yuna0x0.Basis.Convert.Reporting
                 individually += plan.AuthoredMotions.Count - plan.SelectedAuthoredMotionCount;
             }
 
+            if (plan.Options.Materials)
+            {
+                foreach (PlannedPoiyomiMaterial material in plan.PoiyomiMaterials)
+                {
+                    if (material.TargetShader != null && !material.Include)
+                    {
+                        individually++;
+                    }
+                }
+            }
+
             if (plan.Options.Descriptor && plan.Descriptor != null && !plan.Descriptor.Include)
             {
                 individually++;
@@ -261,6 +299,18 @@ namespace yuna0x0.Basis.Convert.Reporting
             {
                 text.AppendLine($"- Left out one by one: {individually}");
             }
+        }
+
+        private static bool AllSourcesIncluded(PlannedPoiyomiMaterial material)
+        {
+            foreach (ConversionSource source in material.Sources)
+            {
+                if (!AvatarConversionPlan.IsIncluded(source))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private static string Suffix(bool included) => included ? string.Empty : "  (left out)";

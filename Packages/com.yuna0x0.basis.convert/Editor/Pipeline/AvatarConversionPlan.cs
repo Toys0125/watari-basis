@@ -151,6 +151,18 @@ namespace yuna0x0.Basis.Convert.Pipeline
         public float Scale;
     }
 
+    /// <summary>One Poiyomi material that can be moved to an installed Poiyomi URP shader.</summary>
+    public sealed class PlannedPoiyomiMaterial
+    {
+        public Material Material;
+        public string SourceShaderName = string.Empty;
+        public Shader TargetShader;
+        public bool Include = true;
+        public List<ConversionSource> Sources = new List<ConversionSource>();
+
+        public string Describe() => Material != null ? Material.name : "(missing material)";
+    }
+
     /// <summary>One Basis head chop the conversion intends to produce, and where it will go.</summary>
     public sealed class PlannedHeadChop
     {
@@ -257,6 +269,31 @@ namespace yuna0x0.Basis.Convert.Pipeline
         /// <summary>Diagnostics about authored motion, gated the same way.</summary>
         public List<ConversionDiagnostic> MotionDiagnostics = new List<ConversionDiagnostic>();
 
+        /// <summary>Diagnostics about Poiyomi material conversion.</summary>
+        public List<ConversionDiagnostic> MaterialDiagnostics = new List<ConversionDiagnostic>();
+
+        public List<PlannedPoiyomiMaterial> PoiyomiMaterials = new List<PlannedPoiyomiMaterial>();
+        public int PoiyomiMaterialsFound;
+
+        public int PoiyomiUrpReadyCount
+        {
+            get
+            {
+                int count = 0;
+                foreach (PlannedPoiyomiMaterial material in PoiyomiMaterials)
+                {
+                    if (material.TargetShader != null)
+                    {
+                        count++;
+                    }
+                }
+
+                return count;
+            }
+        }
+
+        public int PoiyomiUrpMissingCount => PoiyomiMaterials.Count - PoiyomiUrpReadyCount;
+
         /// <summary>
         /// What the humanoid rig looks like to Basis's full-body IK. Not a conversion, so these
         /// are kept apart from the component diagnostics.
@@ -342,12 +379,13 @@ namespace yuna0x0.Basis.Convert.Pipeline
         /// <summary>Everything the plan holds, whatever the options are set to.</summary>
         public int TotalPlanned =>
             Rigs.Count + Constraints.Count + VixxyControls.Count + AuthoredMotions.Count
-            + HeadChops.Count + (Descriptor != null ? 1 : 0);
+            + PoiyomiMaterials.Count + HeadChops.Count + (Descriptor != null ? 1 : 0);
 
         /// <summary>What a conversion would write, with the current options applied.</summary>
         public int TotalSelected =>
             SelectedRigCount + SelectedConstraintCount + SelectedVixxyControlCount
-            + SelectedAuthoredMotionCount + SelectedHeadChopCount + (DescriptorSelected ? 1 : 0);
+            + SelectedAuthoredMotionCount + SelectedPoiyomiMaterialCount + SelectedHeadChopCount
+            + (DescriptorSelected ? 1 : 0);
 
         /// <summary>Head chops go with the descriptor: both describe the avatar, not its parts.</summary>
         public IEnumerable<PlannedHeadChop> SelectedHeadChops()
@@ -433,6 +471,37 @@ namespace yuna0x0.Basis.Convert.Pipeline
             }
         }
 
+        public IEnumerable<PlannedPoiyomiMaterial> SelectedPoiyomiMaterials()
+        {
+            if (!Options.Materials)
+            {
+                yield break;
+            }
+
+            foreach (PlannedPoiyomiMaterial material in PoiyomiMaterials)
+            {
+                if (!material.Include || material.TargetShader == null)
+                {
+                    continue;
+                }
+
+                bool allSourcesIncluded = true;
+                foreach (ConversionSource source in material.Sources)
+                {
+                    if (!IsIncluded(source))
+                    {
+                        allSourcesIncluded = false;
+                        break;
+                    }
+                }
+
+                if (allSourcesIncluded)
+                {
+                    yield return material;
+                }
+            }
+        }
+
         /// <summary>Whether a conversion with these options would write this control.</summary>
         public bool IsSelected(PlannedVixxyControl control) =>
             Options.Toggles && control != null && control.Include && IsIncluded(control.Source);
@@ -451,6 +520,7 @@ namespace yuna0x0.Basis.Convert.Pipeline
         public int SelectedConstraintCount => Tally(SelectedConstraints());
         public int SelectedVixxyControlCount => Tally(SelectedVixxyControls());
         public int SelectedAuthoredMotionCount => Tally(SelectedAuthoredMotions());
+        public int SelectedPoiyomiMaterialCount => Tally(SelectedPoiyomiMaterials());
 
         private static int Tally<T>(IEnumerable<T> items)
         {
@@ -491,6 +561,14 @@ namespace yuna0x0.Basis.Convert.Pipeline
             if (!selectedOnly || Options.Motion)
             {
                 foreach (ConversionDiagnostic diagnostic in MotionDiagnostics)
+                {
+                    yield return diagnostic;
+                }
+            }
+
+            if (!selectedOnly || Options.Materials)
+            {
+                foreach (ConversionDiagnostic diagnostic in MaterialDiagnostics)
                 {
                     yield return diagnostic;
                 }

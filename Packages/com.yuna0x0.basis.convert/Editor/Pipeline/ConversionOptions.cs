@@ -36,8 +36,11 @@ namespace yuna0x0.Basis.Convert.Pipeline
         /// </summary>
         public bool Motion = true;
 
+        /// <summary>Poiyomi materials remapped to an installed Poiyomi URP shader.</summary>
+        public bool Materials = true;
+
         public bool IsEverything =>
-            Physics && Colliders && Constraints && Descriptor && Toggles && Motion;
+            Physics && Colliders && Constraints && Descriptor && Toggles && Motion && Materials;
 
         /// <summary>Names of the categories switched off, for the report to state plainly.</summary>
         public IEnumerable<string> Excluded()
@@ -69,6 +72,11 @@ namespace yuna0x0.Basis.Convert.Pipeline
             if (!Motion)
             {
                 yield return "authored motion";
+            }
+
+            if (!Materials)
+            {
+                yield return "Poiyomi materials";
             }
         }
     }

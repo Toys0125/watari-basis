@@ -37,6 +37,7 @@ namespace yuna0x0.Basis.Convert.UI
         private bool _showConstraints;
         private bool _showToggles;
         private bool _showMotions;
+        private bool _showMaterials;
         private bool _showDiagnostics = true;
         private bool _showTuning;
         private bool _showRig = true;
@@ -99,6 +100,7 @@ namespace yuna0x0.Basis.Convert.UI
             _options.Descriptor = EditorPrefs.GetBool(PrefsPrefix + "descriptor", true);
             _options.Toggles = EditorPrefs.GetBool(PrefsPrefix + "toggles", true);
             _options.Motion = EditorPrefs.GetBool(PrefsPrefix + "motion", true);
+            _options.Materials = EditorPrefs.GetBool(PrefsPrefix + "materials", true);
         }
 
         private void SaveOptions()
@@ -110,6 +112,7 @@ namespace yuna0x0.Basis.Convert.UI
             EditorPrefs.SetBool(PrefsPrefix + "descriptor", _options.Descriptor);
             EditorPrefs.SetBool(PrefsPrefix + "toggles", _options.Toggles);
             EditorPrefs.SetBool(PrefsPrefix + "motion", _options.Motion);
+            EditorPrefs.SetBool(PrefsPrefix + "materials", _options.Materials);
         }
 
         public void SetTarget(GameObject target)
@@ -158,6 +161,7 @@ namespace yuna0x0.Basis.Convert.UI
                 DrawOptions();
                 DrawSources();
                 DrawRig();
+                DrawMaterials();
                 DrawDiagnostics();
                 DrawRigs();
                 DrawConstraints();
@@ -211,11 +215,23 @@ namespace yuna0x0.Basis.Convert.UI
                 EditorGUILayout.Space(2f);
             }
 
-            if (_plan.Profile.LooksInconsistent)
+            if (_plan.Profile.LooksInconsistent && _plan.PoiyomiMaterialsFound == 0)
             {
                 EditorGUILayout.HelpBox(
                     "Humanoid rig, nothing convertible. An avatar whose physics sits on a child "
                     + "prefab looks like this; check the selected object.", MessageType.Warning);
+            }
+
+            if (_options.Materials && _plan.PoiyomiUrpMissingCount > 0)
+            {
+                EditorGUILayout.HelpBox(
+                    $"{_plan.PoiyomiUrpMissingCount} Poiyomi material(s) need URP. Get the Poiyomi "
+                    + "URP shader from the Poiyomi Discord, import it, then Rescan.",
+                    MessageType.Warning);
+                if (GUILayout.Button("Open Poiyomi Discord"))
+                {
+                    Application.OpenURL(PoiyomiMaterialPlanner.DiscordUrl);
+                }
             }
 
             EditorGUILayout.Space(2f);
@@ -227,11 +243,15 @@ namespace yuna0x0.Basis.Convert.UI
             string summary = $"Found: {_plan.PhysBonesFound} PhysBones, "
                 + $"{_plan.DynamicBonesFound} Dynamic Bones, "
                 + $"{_plan.VrmChainsFound} VRM spring chains, {_plan.CollidersFound} colliders, "
-                + $"{_plan.ConstraintsFound} constraints.\n"
+                + $"{_plan.ConstraintsFound} constraints, "
+                + $"{_plan.PoiyomiMaterialsFound} Poiyomi materials needing URP.\n"
                 + $"Writes: {_plan.SelectedRigCount} jiggle rigs, "
                 + $"{_plan.SelectedConstraintCount} Basis constraints, "
                 + $"{_plan.SelectedVixxyControlCount} Vixxy controls, "
                 + $"{_plan.SelectedAuthoredMotionCount} authored motions"
+                + (_plan.SelectedPoiyomiMaterialCount > 0
+                    ? $", {_plan.SelectedPoiyomiMaterialCount} Poiyomi materials"
+                    : "")
                 + (_plan.SelectedHeadChopCount > 0
                     ? $", {_plan.SelectedHeadChopCount} head chops"
                     : "")
@@ -375,6 +395,11 @@ namespace yuna0x0.Basis.Convert.UI
                         "motions"),
                     _plan.AuthoredMotions.Count > 0);
 
+                _options.Materials = Category("Poiyomi materials", _options.Materials,
+                    Tally(_plan.SelectedPoiyomiMaterialCount, _plan.PoiyomiMaterials.Count,
+                        "materials"),
+                    _plan.PoiyomiMaterials.Count > 0);
+
                 if (changed.changed)
                 {
                     SaveOptions();
@@ -484,6 +509,7 @@ namespace yuna0x0.Basis.Convert.UI
         {
             int rigs = 0;
             int constraints = 0;
+            int materials = 0;
 
             foreach (PlannedJiggleRig rig in _plan.Rigs)
             {
@@ -501,6 +527,14 @@ namespace yuna0x0.Basis.Convert.UI
                 }
             }
 
+            foreach (PlannedPoiyomiMaterial material in _plan.PoiyomiMaterials)
+            {
+                if (material.Sources.Contains(source))
+                {
+                    materials++;
+                }
+            }
+
             List<string> parts = new List<string>();
             if (rigs > 0)
             {
@@ -510,6 +544,11 @@ namespace yuna0x0.Basis.Convert.UI
             if (constraints > 0)
             {
                 parts.Add($"{constraints} constraints");
+            }
+
+            if (materials > 0)
+            {
+                parts.Add($"{materials} Poiyomi materials");
             }
 
             if (_plan.Descriptor != null && _plan.Descriptor.Source == source)
@@ -747,6 +786,62 @@ namespace yuna0x0.Basis.Convert.UI
 
                 WrappedLabel(
                     "Higher stiffness: closer to the animated pose. Higher drag: settles sooner.");
+            }
+        }
+
+        private void DrawMaterials()
+        {
+            if (_plan.PoiyomiMaterials.Count == 0)
+            {
+                return;
+            }
+
+            EditorGUILayout.Space();
+            _showMaterials = EditorGUILayout.Foldout(_showMaterials,
+                $"Poiyomi materials ({Tally(_plan.SelectedPoiyomiMaterialCount, _plan.PoiyomiMaterials.Count, "selected")})",
+                true);
+            if (!_showMaterials)
+            {
+                return;
+            }
+
+            using (new EditorGUI.IndentLevelScope())
+            using (new EditorGUI.DisabledScope(!_options.Materials))
+            {
+                if (_advanced)
+                {
+                    DrawSelectAll(include =>
+                    {
+                        foreach (PlannedPoiyomiMaterial material in _plan.PoiyomiMaterials)
+                        {
+                            material.Include = include;
+                        }
+                    });
+                }
+
+                foreach (PlannedPoiyomiMaterial material in _plan.PoiyomiMaterials)
+                {
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        if (_advanced)
+                        {
+                            material.Include = EditorGUILayout.Toggle(material.Include,
+                                GUILayout.Width(24f));
+                        }
+
+                        if (GUILayout.Button(material.Describe(), EditorStyles.linkLabel,
+                                GUILayout.MinWidth(120f)))
+                        {
+                            EditorGUIUtility.PingObject(material.Material);
+                        }
+
+                        GUILayout.Label(
+                            material.TargetShader != null
+                                ? $"{material.SourceShaderName} → {material.TargetShader.name}"
+                                : "Poiyomi URP missing",
+                            EditorStyles.wordWrappedLabel);
+                    }
+                }
             }
         }
 
@@ -1101,7 +1196,7 @@ namespace yuna0x0.Basis.Convert.UI
 
                 using (new EditorGUI.DisabledScope(_plan.TotalSelected == 0))
                 {
-                    if (GUILayout.Button($"Convert {_plan.TotalSelected} components"))
+                    if (GUILayout.Button($"Convert {_plan.TotalSelected} items"))
                     {
                         Convert();
                     }
@@ -1139,14 +1234,17 @@ namespace yuna0x0.Basis.Convert.UI
 
             bool trouble = _result.TotalSkipped > 0;
             string headline = trouble
-                ? $"Converted {_result.TotalWritten} components, skipped {_result.TotalSkipped}"
-                : $"Converted {_result.TotalWritten} components";
+                ? $"Converted {_result.TotalWritten} items, skipped {_result.TotalSkipped}"
+                : $"Converted {_result.TotalWritten} items";
 
             WrappedLabel(headline, HeadlineStyle(trouble));
             WrappedLabel(
                 $"{_result.RigsWritten} jiggle rigs, {_result.ConstraintsWritten} constraints, "
                 + $"{_result.VixxyControlsWritten} Vixxy controls, "
                 + $"{_result.AuthoredMotionsWritten} authored motions"
+                + (_result.PoiyomiMaterialsWritten > 0
+                    ? $", {_result.PoiyomiMaterialsWritten} Poiyomi materials"
+                    : "")
                 + (_result.HeadChopsWritten > 0 ? $", {_result.HeadChopsWritten} head chops" : "")
                 + (_result.DescriptorWritten ? ", Basis Avatar." : "."));
 
@@ -1232,7 +1330,7 @@ namespace yuna0x0.Basis.Convert.UI
 
             _groups = ConversionReport.Group(_plan);
 
-            if (_plan.TotalPlanned == 0)
+            if (_plan.TotalPlanned == 0 && _plan.PoiyomiMaterialsFound == 0)
             {
                 string model = _plan.ComponentsRead == 0 && _plan.Sources.Count > 0
                     ? _plan.Sources[0].ModelAssetPath()

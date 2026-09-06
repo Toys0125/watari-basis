@@ -49,7 +49,16 @@ on the case; the usual one is given.
 | `apply.descriptorUnresolved` | Warning | The avatar descriptor has no object in the target hierarchy. |
 | `apply.vixxyUnresolved` | Warning | A control switches an object that is not in the target hierarchy. |
 | `apply.motionUnresolved` | Warning | A motion came from a prefab that moved since the scan. |
+| `apply.poiyomiMaterial` | Warning | A planned Poiyomi material could not be remapped when Convert ran. Rescan and try again. |
 | `vrm.runtimeRemoved` | Mapped | UniVRM's runtime drivers were removed from the converted avatar. They rewrote expressions, spring bones and look-at every frame. Undo restores them. |
+
+### Materials
+
+| Code | Severity | Meaning |
+|---|---|---|
+| `material.poiyomiUrp` | Mapped | Poiyomi materials will be remapped to the installed Poiyomi URP shader with their saved properties, textures, keywords and render queue kept. |
+| `material.poiyomiUrpMissing` | Warning | One or more Poiyomi materials have no compatible Poiyomi URP shader installed. Get it from the Poiyomi Discord, import it, then rescan. |
+| `material.poiyomiReadOnly` | Warning | A Poiyomi material is not an editable `.mat` under `Assets`, so it is left alone. Extract or duplicate it first. |
 
 ### PhysBones
 

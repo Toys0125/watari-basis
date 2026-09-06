@@ -6,6 +6,13 @@ Notable changes to this package. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Poiyomi materials are detected from their shader or retained serialized markers. When a
+  compatible Poiyomi URP shader is installed, Watari remaps them while keeping saved material
+  data; otherwise it leaves them unchanged and directs the user to the Poiyomi Discord for the
+  URP shader.
+
 ## [0.5.8] - 2026-09-07
 
 ### Changed
