@@ -245,8 +245,7 @@ namespace yuna0x0.Basis.Convert.Tests
                 },
             };
 
-            VixxyControlPlan plan = VrmExpressionToVixxyMapper.MapSelector(
-                new[] { happy }, null, hosts);
+            VixxyControlPlan plan = VrmExpressionToVixxyMapper.MapSelector(new[] { happy }, hosts);
 
             Assert.That(plan.Subjects.Count, Is.EqualTo(1), "only the blendshape subject");
             Assert.That(plan.Subjects[0].MaterialProperties, Is.Empty);

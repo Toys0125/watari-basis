@@ -7,8 +7,11 @@
 The expressions an author added and the emotion presets become one Vixxy control named
 Expression, with Neutral as the first choice and one choice per expression. Every blendshape
 any of them touches is written at every choice: the expression's weight where it sets the shape,
-zero everywhere else. Visemes, blink and look-at are left to Basis as before. A Neutral
-expression that carries weights of its own fills the first choice.
+zero everywhere else. Visemes, blink and look-at are left to Basis as before. The first
+choice, Neutral, is every shape at zero. An avatar's own `neutral` expression is not applied:
+the spec keeps that preset for backwards compatibility and applications do not wear it, and
+applying VRoid's `Fcl_ALL_Neutral` at full weight changed the sample avatar's face (0.5.5 to
+0.5.6).
 
 ## Why
 

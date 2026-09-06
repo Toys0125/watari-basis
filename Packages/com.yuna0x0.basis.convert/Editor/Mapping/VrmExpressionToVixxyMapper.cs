@@ -17,8 +17,10 @@ namespace yuna0x0.Basis.Convert.Mapping
     /// </para>
     /// <para>
     /// Only the expressions an author added and the emotions are choices. Visemes, blinking and
-    /// looking around are driven by Basis itself. Neutral, when it carries weights of its own, is
-    /// the first choice. A material colour or texture offset an expression sets is written on
+    /// looking around are driven by Basis itself. The first choice, Neutral, is every shape at
+    /// zero: the spec keeps the `neutral` preset for backwards compatibility and applications do
+    /// not apply it, so an avatar's own Neutral expression is not worn either. A material colour
+    /// or texture offset an expression sets is written on
     /// every renderer that uses the material it names and nothing else, as a Vixxy material
     /// property; Vixxy sets properties per renderer, so a renderer that also carries other
     /// materials is left alone and reported.
@@ -79,11 +81,10 @@ namespace yuna0x0.Basis.Convert.Mapping
         }
 
         /// <summary>
-        /// One selector over these expressions. <paramref name="neutral"/> is the avatar's
-        /// Neutral expression when it has bindings, and may be null.
+        /// One selector over these expressions, with Neutral as every shape at zero.
         /// </summary>
         public static VixxyControlPlan MapSelector(
-            IReadOnlyList<VrmExpressionData> expressions, VrmExpressionData neutral = null,
+            IReadOnlyList<VrmExpressionData> expressions,
             IReadOnlyDictionary<string, List<VrmMaterialHost>> hosts = null)
         {
             VixxyControlPlan plan = new VixxyControlPlan
@@ -270,11 +271,6 @@ namespace yuna0x0.Basis.Convert.Mapping
                         $"'{expression.Name}' changes material '{string.Join("', '", missing)}', "
                         + "which no renderer on this avatar uses, so that part was not written.");
                 }
-            }
-
-            if (neutral != null)
-            {
-                Apply(neutral, 0);
             }
 
             int continuous = 0;

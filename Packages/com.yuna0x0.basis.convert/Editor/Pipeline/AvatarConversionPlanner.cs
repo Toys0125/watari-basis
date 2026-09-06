@@ -1288,7 +1288,6 @@ namespace yuna0x0.Basis.Convert.Pipeline
                 : plan.SourceRoot.transform;
 
             List<VrmExpressionData> choices = new List<VrmExpressionData>();
-            VrmExpressionData neutral = null;
             int driven = 0;
             Dictionary<string, List<VrmMaterialHost>> hosts = MaterialHosts(root);
 
@@ -1311,14 +1310,8 @@ namespace yuna0x0.Basis.Convert.Pipeline
                         $"'{expression.Name}' changes only materials no renderer on this avatar "
                         + "uses, so nothing was written for it.");
                 }
-                else if (expression.Role == VrmExpressionRole.Neutral)
-                {
-                    if (expression.Bindings.Count > 0)
-                    {
-                        neutral = expression;
-                    }
-                }
-                else if (expression.Role != VrmExpressionRole.Custom
+                else if (expression.Role != VrmExpressionRole.Neutral
+                         && expression.Role != VrmExpressionRole.Custom
                          && expression.Role != VrmExpressionRole.Emotion)
                 {
                     driven++;
@@ -1327,8 +1320,7 @@ namespace yuna0x0.Basis.Convert.Pipeline
 
             if (choices.Count > 0)
             {
-                VixxyControlPlan control =
-                    VrmExpressionToVixxyMapper.MapSelector(choices, neutral, hosts);
+                VixxyControlPlan control = VrmExpressionToVixxyMapper.MapSelector(choices, hosts);
                 foreach (ConversionDiagnostic diagnostic in control.Diagnostics)
                 {
                     plan.ToggleDiagnostics.Add(diagnostic);

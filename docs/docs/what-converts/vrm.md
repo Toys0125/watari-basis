@@ -72,7 +72,8 @@ once, each at its own strength; a menu has no strength and no application drivin
 wearer picks one. The expressions an author added, and the emotion presets, become one Vixxy
 selector named Expression: Neutral first, then one choice per expression. Every shape any
 expression touches is set at every choice, at the expression's weight or at zero, which is the
-spec's own rule for applying expressions.
+spec's own rule for applying expressions. Neutral is every shape at zero; the avatar's own
+`neutral` preset is not worn, since VRM applications do not apply it either.
 
 An expression that also changes a material colour, or a texture's scale and offset, keeps that
 too. VRM names the material; the property is written on every renderer that uses that material

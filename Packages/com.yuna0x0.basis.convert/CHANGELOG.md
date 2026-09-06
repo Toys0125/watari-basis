@@ -6,6 +6,14 @@ Notable changes to this package. The format follows
 
 ## [Unreleased]
 
+## [0.5.6] - 2026-09-06
+
+### Fixed
+
+- The Expression selector's Neutral choice applied the avatar's own `neutral` expression at full
+  weight, which VRM applications never do; on a VRoid avatar that reshaped the face and eyes.
+  Neutral is every expression shape at zero.
+
 ## [0.5.5] - 2026-09-06
 
 ### Fixed
@@ -247,7 +255,8 @@ First release.
 - Two physics settings are fits rather than conversions, exposed as adjustable weights.
 - Component data is read from prefab files, so the avatar must still be linked to its prefab.
 
-[Unreleased]: https://github.com/yuna0x0/watari-basis/compare/v0.5.5...HEAD
+[Unreleased]: https://github.com/yuna0x0/watari-basis/compare/v0.5.6...HEAD
+[0.5.6]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.6
 [0.5.5]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.5
 [0.5.4]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.4
 [0.5.3]: https://github.com/yuna0x0/watari-basis/releases/tag/v0.5.3
