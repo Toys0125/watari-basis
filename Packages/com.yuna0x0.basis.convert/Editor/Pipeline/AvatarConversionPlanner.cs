@@ -890,6 +890,20 @@ namespace yuna0x0.Basis.Convert.Pipeline
                 plan.VrmEyeOrigin = origin;
             }
 
+            // Basis's eye driver turns every avatar's eyes up to the same angle, 25 degrees, and
+            // counter-rotates them while the head turns; nothing on the avatar lowers it. A model
+            // built for VRM's usual 10 shows the white of the eye well before 25.
+            const float basisEyeLimitDegrees = 25f;
+            if (!settings.LookAtByExpression && settings.EyeRotationLimitDegrees > 0f
+                && settings.EyeRotationLimitDegrees < basisEyeLimitDegrees)
+            {
+                plan.Diagnostics.Add(DiagnosticSeverity.Dropped, "vrm.lookAt.range",
+                    $"The avatar limits its eye bones to {settings.EyeRotationLimitDegrees:0.#} "
+                    + $"degrees. Basis turns eyes up to {basisEyeLimitDegrees:0} degrees and has "
+                    + "no setting on the avatar to lower it, so on a large eye the white shows "
+                    + "when the eyes track past the model's limit.");
+            }
+
             if (settings.LookAtByExpression)
             {
                 plan.Diagnostics.Add(DiagnosticSeverity.Dropped, "vrm.lookAt.expression",

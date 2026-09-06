@@ -289,6 +289,17 @@ namespace yuna0x0.Basis.Convert.Sources
             SerializedProperty lookAtType = vrm.FindProperty("LookAt.LookAtType");
             settings.LookAtByExpression = lookAtType != null && lookAtType.enumValueIndex == 1;
 
+            foreach (string map in new[]
+                     { "HorizontalOuter", "HorizontalInner", "VerticalDown", "VerticalUp" })
+            {
+                SerializedProperty scale = vrm.FindProperty($"LookAt.{map}.CurveYRangeDegree");
+                if (scale != null)
+                {
+                    settings.EyeRotationLimitDegrees =
+                        Mathf.Max(settings.EyeRotationLimitDegrees, scale.floatValue);
+                }
+            }
+
             CountFirstPersonFlags(vrm.FindProperty("FirstPerson.Renderers"), settings);
             return settings;
         }

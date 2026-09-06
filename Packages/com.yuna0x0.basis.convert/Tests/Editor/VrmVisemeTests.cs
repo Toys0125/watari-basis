@@ -192,6 +192,17 @@ namespace yuna0x0.Basis.Convert.Tests
         }
 
         [Test]
+        public void TheEyeRotationLimitIsReadAndReported()
+        {
+            // VRM states how far the eye bones may turn; Basis turns them up to 25 degrees for
+            // every avatar. The largest of the four range maps is the avatar's limit.
+            AvatarConversionPlan plan = PlanWithDescriptor(Vrm10Path);
+
+            Assert.That(plan.VrmSettings.EyeRotationLimitDegrees, Is.EqualTo(12f).Within(1e-4f));
+            Assert.That(plan.AllDiagnostics().HasCode("vrm.lookAt.range"), Is.True);
+        }
+
+        [Test]
         public void OverridesAndContinuousExpressionsAreReported()
         {
             // The fixture's Happy blocks blink while worn and can be worn at any strength. Basis

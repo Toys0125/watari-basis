@@ -408,6 +408,17 @@ namespace yuna0x0.Basis.Convert.Sources
                 foreach (string line in lookAt)
                 {
                     string trimmed = line.TrimStart();
+
+                    // The four range maps are nested maps; only their output scale matters here.
+                    if (trimmed.StartsWith("CurveYRangeDegree:")
+                        && UnityYamlValues.TryParseFloat(
+                            trimmed.Substring("CurveYRangeDegree:".Length).Trim(), out float scale))
+                    {
+                        settings.EyeRotationLimitDegrees =
+                            Mathf.Max(settings.EyeRotationLimitDegrees, scale);
+                        continue;
+                    }
+
                     if (trimmed.StartsWith("LookAtType:"))
                     {
                         settings.LookAtByExpression =
@@ -425,8 +436,6 @@ namespace yuna0x0.Basis.Convert.Sources
                         settings.EyeOffsetFromHead = offset;
                         settings.HasEyeOffset = offset != Vector3.zero;
                     }
-
-                    break;
                 }
             }
 

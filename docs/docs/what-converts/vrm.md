@@ -159,4 +159,8 @@ camera, add a Basis Head Chop naming it.
   0.x writes this as components, which are reported as `vrm.lookAt`. An avatar whose look-at
   type is `expression` has no eye bones to rotate, so its eyes stay still on Basis:
   `vrm.lookAt.expression`.
+- **How far the eyes may turn.** VRM 1.0 states a limit per direction, 10 degrees on a VRoid
+  export. Basis turns every avatar's eyes up to 25 degrees and counter-rotates them while the
+  head turns, with no setting on the avatar to lower it, so a large eye shows white past the
+  model's limit: `vrm.lookAt.range`.
 - **The avatar's metadata**: its title, author and permissions.

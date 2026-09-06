@@ -29,6 +29,12 @@ namespace yuna0x0.Basis.Convert.Model
         /// </summary>
         public bool LookAtByExpression;
 
+        /// <summary>
+        /// The most an eye bone may turn, in degrees: the largest `outputScale` of the four VRM 1.0
+        /// range maps. Zero when the avatar states none.
+        /// </summary>
+        public float EyeRotationLimitDegrees;
+
         public int ThirdPersonOnlyRenderers;
 
         /// <summary>Renderers the avatar shows only to the wearer.</summary>

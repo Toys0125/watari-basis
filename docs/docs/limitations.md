@@ -28,6 +28,8 @@ Everything here is also reported by the tool. This is the same information in on
 - **Two physics settings are fits**, not conversions. See [Physics](what-converts/physics.md).
 - **Wide angle limits are dropped** rather than clamped to something tighter.
 - **A head chop applies in VR and on desktop alike**, whichever VRChat limited it to.
+- **Eyes turn up to 25 degrees on every avatar.** Basis has no per-avatar limit; a VRM built for
+  10 degrees shows white when its eyes track past that.
 - **Global PhysBone colliders stay local.** Basis makes hands, arms and feet global on its own.
 - **Material properties are applied through a property block**, which covers every material on a
   renderer. A renderer with more than one material is reported.

@@ -35,6 +35,19 @@ MonoBehaviour:
     - {fileID: 11400003}
   LookAt:
     OffsetFromHead: {x: 0, y: 0.06, z: 0.08}
+    LookAtType: 0
+    HorizontalOuter:
+      CurveXRangeDegree: 90
+      CurveYRangeDegree: 10
+    HorizontalInner:
+      CurveXRangeDegree: 90
+      CurveYRangeDegree: 10
+    VerticalDown:
+      CurveXRangeDegree: 90
+      CurveYRangeDegree: 10
+    VerticalUp:
+      CurveXRangeDegree: 90
+      CurveYRangeDegree: 12
   FirstPerson:
     Renderers:
     - Renderer: {fileID: 0}
