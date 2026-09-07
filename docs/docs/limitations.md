@@ -70,10 +70,10 @@ installed for it to import at all, so its components are read directly. See
 
 ## Things a conversion does not touch
 
-Most materials and shaders, meshes, the avatar's animator, and anything Basis fills in itself when
-the `BasisAvatar` inspector is first opened.
+Non-Poiyomi materials and shaders, meshes, the avatar's animator, and anything Basis fills in
+itself when the `BasisAvatar` inspector is first opened.
 
-Poiyomi is the material exception. Watari detects Poiyomi materials, including ones whose shader
+Poiyomi materials are supported. Watari detects them, including materials whose Poiyomi shader
 reference has already fallen back or gone missing. If a Poiyomi URP shader is installed, those
 materials can be remapped to it while keeping their saved Poiyomi properties, textures, keywords
 and render queue. If it is not installed, Watari leaves the materials unchanged and directs you
